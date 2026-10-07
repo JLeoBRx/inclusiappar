@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Teste de reconhecimento MindAR</title>
+<!--
+  Mede o reconhecimento dos alvos com o detector real do MindAR, sem câmera:
+  cada quadro sintético (tests/make_frames.py) passa pelo mesmo ciclo do
+  processVideo — 9 recortes "detectMoving" + matching no worker — e depois
+  por uma etapa de tracking. Resultado em window.__RESULT__.
+  Parâmetros: ?mind=/inclusiapp/assets/targets/cartas.mind&frames=cartas&count=20&variants=frente,inclinada
+-->
+</head>
+<body>
+<pre id="log"></pre>
+<script type="module">
+import '/inclusiapp/vendor/mind-ar/mindar-image.prod.js';
+
+const params = new URLSearchParams(location.search);
+const mindUrl = params.get('mind');
+const set = params.get('frames');
+const count = +params.get('count');
+const variants = (params.get('variants') || 'frente,inclinada,longe,escura').split(',');
+const log = (s) => { document.getElementById('log').textContent += `${s}\n`; };
+
+function loadImage(url) {
+  return new Promise((ok, fail) => {
+    const img = new Image();
+    img.onload = () => ok(img);
+    img.onerror = () => fail(new Error(url));
+    img.src = url;
+  });
+}
+
+const canvas = document.createElement('canvas');
+canvas.width = 640;
+canvas.height = 480;
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+const controller = new window.MINDAR.IMAGE.Controller({ inputWidth: 640, inputHeight: 480, maxTrack: 1 });
+const buffer = await (await fetch(mindUrl)).arrayBuffer();
+const { dimensions } = controller.addImageTargetsFromBuffer(buffer);
+controller.dummyRun(canvas);
+const all = dimensions.map((_, i) => i);
+log(`${dimensions.length} alvos carregados`);
+
+const results = [];
+for (let target = 0; target < count; target++) {
+  for (const variant of variants) {
+    const img = await loadImage(`/tests/fixtures/frames/${set}/${target}_${variant}.jpg`);
+    ctx.drawImage(img, 0, 0, 640, 480);
+    const inputT = controller.inputLoader.loadInput(canvas);
+    const matches = [];
+    let tracked = null;
+    // mesmas 9 posições de recorte que o processVideo percorre em 9 quadros
+    for (let k = 0; k < 9; k++) {
+      const { featurePoints } = controller.cropDetector.detectMoving(inputT);
+      const { targetIndex, modelViewTransform } = await controller._workerMatch(featurePoints, all);
+      if (targetIndex !== -1) {
+        matches.push(targetIndex);
+        if (tracked === null) {
+          const mvt = await controller._trackAndUpdate(inputT, modelViewTransform, targetIndex);
+          tracked = mvt !== null;
+        }
+      }
+    }
+    inputT.dispose();
+    const first = matches.length ? matches[0] : -1;
+    const wrong = [...new Set(matches.filter((m) => m !== target))];
+    results.push({ target, variant, first, hits: matches.filter((m) => m === target).length, wrong, tracked });
+    log(`alvo ${target} ${variant}: ${first === target ? 'OK' : first === -1 ? 'não detectado' : `CONFUNDIDO com ${first}`}` +
+      ` (${matches.filter((m) => m === target).length}/9 recortes${wrong.length ? `, errados: ${wrong}` : ''}, tracking ${tracked})`);
+  }
+}
+window.__RESULT__ = results;
+</script>
+</body>
+</html>
