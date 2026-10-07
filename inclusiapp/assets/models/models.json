@@ -1,0 +1,309 @@
+{
+  "abelha": {
+    "animal": "Abelha",
+    "parts": [
+      {
+        "name": "asa-direita",
+        "pivot": [
+          0.18698,
+          0.43423,
+          -0.01915
+        ],
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "amplitude": 28,
+        "frequency": 9,
+        "phase": 0,
+        "offset": -6
+      },
+      {
+        "name": "asa-esquerda",
+        "pivot": [
+          -0.18563,
+          0.43423,
+          -0.01915
+        ],
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "amplitude": -28,
+        "frequency": 9,
+        "phase": 0,
+        "offset": 6
+      }
+    ],
+    "size": [
+      0.77,
+      0.8211,
+      1.0
+    ],
+    "pattern": {
+      "type": "stripes",
+      "params": [
+        7.2,
+        0.012,
+        0.15,
+        0
+      ],
+      "color": [
+        0.02,
+        0.014,
+        0.008
+      ]
+    },
+    "hover": true,
+    "source": "modelo3d/Abelha.asset (Optimized__Object_116)"
+  },
+  "elefante": {
+    "animal": "Elefante",
+    "parts": [
+      {
+        "name": "orelha-direita",
+        "pivot": [
+          0.04921,
+          0.51102,
+          0.19752
+        ],
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "amplitude": 10,
+        "frequency": 0.55,
+        "phase": 0,
+        "offset": 0
+      },
+      {
+        "name": "orelha-esquerda",
+        "pivot": [
+          -0.04363,
+          0.5112,
+          0.19509
+        ],
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "amplitude": -10,
+        "frequency": 0.55,
+        "phase": 0,
+        "offset": 0
+      },
+      {
+        "name": "tromba",
+        "pivot": [
+          -0.00325,
+          0.33665,
+          0.30573
+        ],
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "amplitude": 9,
+        "frequency": 0.35,
+        "phase": 1.2
+      },
+      {
+        "name": "cauda",
+        "pivot": [
+          -0.00852,
+          0.3499,
+          -0.39157
+        ],
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "amplitude": 22,
+        "frequency": 1.1,
+        "phase": 0.4,
+        "burst": 0.18
+      }
+    ],
+    "size": [
+      0.4897,
+      0.5931,
+      1.0
+    ],
+    "pattern": null,
+    "hover": false,
+    "source": "modelo3d/Elefante.asset (Optimized__Elephant)"
+  },
+  "iguana": {
+    "animal": "Iguana",
+    "parts": [
+      {
+        "name": "cabeca",
+        "pivot": [
+          -0.00136,
+          0.33181,
+          0.1644
+        ],
+        "axis": [
+          1,
+          0,
+          0
+        ],
+        "amplitude": 7,
+        "frequency": 0.9,
+        "phase": 0,
+        "burst": 0.22
+      },
+      {
+        "name": "cauda",
+        "pivot": [
+          -0.00086,
+          0.23957,
+          -0.20011
+        ],
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "amplitude": 10,
+        "frequency": 0.45,
+        "phase": 0.8
+      }
+    ],
+    "size": [
+      0.4791,
+      0.5405,
+      1.0
+    ],
+    "pattern": {
+      "type": "stripes",
+      "params": [
+        9.0,
+        0.0,
+        0.35,
+        0
+      ],
+      "color": [
+        0.05,
+        0.13,
+        0.04
+      ]
+    },
+    "hover": false,
+    "source": "modelo3d/Iguana.asset (Optimized__char1)"
+  },
+  "onca": {
+    "animal": "Onça",
+    "parts": [
+      {
+        "name": "cauda",
+        "pivot": [
+          0.00259,
+          0.39595,
+          -0.32197
+        ],
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "amplitude": 16,
+        "frequency": 0.6,
+        "phase": 0
+      },
+      {
+        "name": "cabeca",
+        "pivot": [
+          0.0,
+          0.4,
+          0.33
+        ],
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "amplitude": 9,
+        "frequency": 0.18,
+        "phase": 0.6
+      }
+    ],
+    "size": [
+      0.2466,
+      0.4956,
+      1.0
+    ],
+    "pattern": {
+      "type": "rosettes",
+      "params": [
+        24.0,
+        0.33,
+        0.1,
+        0.35
+      ],
+      "color": [
+        0.02,
+        0.016,
+        0.012
+      ],
+      "color2": [
+        0.62,
+        0.42,
+        0.24
+      ]
+    },
+    "hover": false,
+    "source": "modelo3d/Onca.asset (Optimized__Yaguarete)"
+  },
+  "urso": {
+    "animal": "Urso",
+    "parts": [
+      {
+        "name": "cabeca-gira",
+        "pivot": [
+          0.0,
+          0.52,
+          0.28
+        ],
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "amplitude": 11,
+        "frequency": 0.16,
+        "phase": 0
+      },
+      {
+        "name": "cabeca-acena",
+        "pivot": [
+          0.0,
+          0.52,
+          0.28
+        ],
+        "axis": [
+          1,
+          0,
+          0
+        ],
+        "amplitude": 5,
+        "frequency": 0.3,
+        "phase": 1.0
+      }
+    ],
+    "size": [
+      0.3933,
+      0.6642,
+      1.0
+    ],
+    "pattern": null,
+    "hover": false,
+    "source": "modelo3d/Urso.asset (Optimized__node_id30)"
+  }
+}

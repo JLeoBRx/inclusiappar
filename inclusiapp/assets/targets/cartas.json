@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-07T21:30:26.957Z",
+  "mind": "cartas.mind",
+  "bytes": 5533782,
+  "checksum": "4aae7d1d",
+  "maxSize": 400,
+  "count": 20,
+  "targets": [
+    {
+      "index": 0,
+      "file": "cartas/carta1.png",
+      "width": 461,
+      "height": 715
+    },
+    {
+      "index": 1,
+      "file": "cartas/carta2.png",
+      "width": 496,
+      "height": 700
+    },
+    {
+      "index": 2,
+      "file": "cartas/carta3.png",
+      "width": 465,
+      "height": 699
+    },
+    {
+      "index": 3,
+      "file": "cartas/carta4.png",
+      "width": 485,
+      "height": 680
+    },
+    {
+      "index": 4,
+      "file": "cartas/carta5.png",
+      "width": 480,
+      "height": 700
+    },
+    {
+      "index": 5,
+      "file": "cartas/carta6.png",
+      "width": 474,
+      "height": 693
+    },
+    {
+      "index": 6,
+      "file": "cartas/carta7.png",
+      "width": 463,
+      "height": 697
+    },
+    {
+      "index": 7,
+      "file": "cartas/carta8.png",
+      "width": 464,
+      "height": 703
+    },
+    {
+      "index": 8,
+      "file": "cartas/carta9.png",
+      "width": 480,
+      "height": 693
+    },
+    {
+      "index": 9,
+      "file": "cartas/carta10.png",
+      "width": 473,
+      "height": 693
+    },
+    {
+      "index": 10,
+      "file": "cartas/carta11.png",
+      "width": 500,
+      "height": 703
+    },
+    {
+      "index": 11,
+      "file": "cartas/carta12.png",
+      "width": 500,
+      "height": 696
+    },
+    {
+      "index": 12,
+      "file": "cartas/carta13.png",
+      "width": 480,
+      "height": 700
+    },
+    {
+      "index": 13,
+      "file": "cartas/carta14.png",
+      "width": 473,
+      "height": 700
+    },
+    {
+      "index": 14,
+      "file": "cartas/carta15.png",
+      "width": 494,
+      "height": 690
+    },
+    {
+      "index": 15,
+      "file": "cartas/carta16.png",
+      "width": 490,
+      "height": 680
+    },
+    {
+      "index": 16,
+      "file": "cartas/carta17.png",
+      "width": 480,
+      "height": 680
+    },
+    {
+      "index": 17,
+      "file": "cartas/carta18.png",
+      "width": 485,
+      "height": 695
+    },
+    {
+      "index": 18,
+      "file": "cartas/carta19.png",
+      "width": 450,
+      "height": 660
+    },
+    {
+      "index": 19,
+      "file": "cartas/carta20.png",
+      "width": 500,
+      "height": 685
+    }
+  ]
+}

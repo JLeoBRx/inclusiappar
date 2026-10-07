@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-07T21:29:38.113Z",
+  "mind": "paginas.mind",
+  "bytes": 2617580,
+  "checksum": "000a1d0f",
+  "maxSize": 512,
+  "count": 5,
+  "targets": [
+    {
+      "index": 0,
+      "file": "pag/Pagina1.png",
+      "width": 935,
+      "height": 1319
+    },
+    {
+      "index": 1,
+      "file": "pag/Pagina2.png",
+      "width": 1280,
+      "height": 901
+    },
+    {
+      "index": 2,
+      "file": "pag/Pagina3.png",
+      "width": 1332,
+      "height": 908
+    },
+    {
+      "index": 3,
+      "file": "pag/Pagina4.png",
+      "width": 1281,
+      "height": 902
+    },
+    {
+      "index": 4,
+      "file": "pag/Pagina5.png",
+      "width": 1280,
+      "height": 903
+    }
+  ]
+}
