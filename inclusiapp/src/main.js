@@ -1,0 +1,144 @@
+/**
+ * Inicialização do app SinalizaAção: Animais em Voga.
+ *
+ *   MENU ─┬─ 📖 LIVRO ─ explicação ─ AR (páginas → animais 3D + LIBRAS)
+ *         └─ 🃏 JOGO ── explicação ─ AR (cartas → pontos)
+ */
+import { Router } from './router.js';
+import { BookExperience } from './ar/bookAR.js';
+import { GameExperience } from './game/cardGame.js';
+import { loadMindAR } from './ar/arSession.js';
+import { setupMenu } from './ui/menu.js';
+import { setupBookIntro, setupGameIntro } from './ui/instructions.js';
+import { toast } from './ui/notifications.js';
+
+const params = new URLSearchParams(location.search);
+const $ = (selector) => document.querySelector(selector);
+const screens = {
+  menu: $('[data-screen="menu"]'),
+  bookIntro: $('[data-screen="book-intro"]'),
+  bookAR: $('[data-screen="book-ar"]'),
+  gameIntro: $('[data-screen="game-intro"]'),
+  gameAR: $('[data-screen="game-ar"]'),
+};
+
+/* ---------------------------------------------------------------- loading */
+const loading = {
+  bar: $('#loading-bar'),
+  text: $('#loading-text'),
+  set(progress, text) {
+    this.bar.style.width = `${Math.round(progress * 100)}%`;
+    if (text) this.text.textContent = text;
+  },
+  async hide() {
+    const el = $('#loading');
+    el.classList.add('is-done');
+    await new Promise((r) => setTimeout(r, 450));
+    el.remove();
+  },
+};
+
+function decodeImage(src) {
+  const img = new Image();
+  img.src = src;
+  return (img.decode ? img.decode() : new Promise((r) => { img.onload = r; })).catch(() => {});
+}
+
+function withTimeout(promise, ms) {
+  return Promise.race([promise, new Promise((r) => setTimeout(r, ms))]);
+}
+
+/* ---------------------------------------------------------------- telas */
+const book = new BookExperience(screens.bookAR);
+const game = new GameExperience(screens.gameAR);
+let permit = null; // rota AR liberada por um toque em "Começar"
+let resumeGame = false;
+
+const router = new Router({
+  '': { screen: screens.menu, ...setupMenu(screens.menu) },
+  livro: {
+    screen: screens.bookIntro,
+    ...setupBookIntro(screens.bookIntro, {
+      start: () => {
+        permit = 'livro/ar';
+        router.go('livro/ar');
+      },
+    }),
+  },
+  'livro/ar': {
+    screen: screens.bookAR,
+    guard: () => (permit === 'livro/ar' ? null : 'livro'),
+    enter: () => book.enter(),
+    leave: () => {
+      permit = null;
+      return book.leave();
+    },
+  },
+  jogo: {
+    screen: screens.gameIntro,
+    ...setupGameIntro(screens.gameIntro, {
+      start: ({ resume }) => {
+        resumeGame = resume;
+        permit = 'jogo/jogar';
+        router.go('jogo/jogar');
+      },
+    }),
+  },
+  'jogo/jogar': {
+    screen: screens.gameAR,
+    guard: () => (permit === 'jogo/jogar' ? null : 'jogo'),
+    enter: () => game.enter({ resume: resumeGame }),
+    leave: () => {
+      permit = null;
+      return game.leave();
+    },
+  },
+});
+
+/* ---------------------------------------------------------------- boot */
+async function boot() {
+  const started = performance.now();
+  loading.set(0.15, 'Preparando sua experiência...');
+  const wide = window.matchMedia('(min-width: 900px), (min-resolution: 2.5dppx)').matches;
+  const tasks = [
+    withTimeout(document.fonts?.ready || Promise.resolve(), 2500),
+    decodeImage('assets/img/logo.webp'),
+    decodeImage(wide ? 'assets/img/vila-1920.webp' : 'assets/img/vila-1080.webp'),
+  ];
+  let done = 0;
+  tasks.forEach((t) => t.then(() => loading.set(0.15 + (0.75 * ++done) / tasks.length)));
+  await withTimeout(Promise.all(tasks), 6000);
+  loading.set(1, 'Tudo pronto!');
+  // um instante para a animação de abertura (sem atrasar quem tem internet lenta)
+  const elapsed = performance.now() - started;
+  if (elapsed < 900) await new Promise((r) => setTimeout(r, 900 - elapsed));
+  await router.start();
+  await loading.hide();
+
+  // deixa a biblioteca de AR pronta enquanto a pessoa escolhe no menu
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+  if (!navigator.connection?.saveData) idle(() => loadMindAR().catch(() => {}), { timeout: 4000 });
+
+  if ('serviceWorker' in navigator && !params.has('nosw') && !params.has('test')) {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.warn('[sw]', err));
+  }
+}
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('[app]', event.reason);
+});
+window.addEventListener('error', (event) => {
+  console.error('[app]', event.error || event.message);
+});
+window.addEventListener('offline', () => toast('📶 Você está sem internet. O que já foi carregado continua funcionando.', { type: 'warning' }));
+
+if (params.has('test')) window.__app = { router, book, game };
+
+boot().catch((err) => {
+  console.error(err);
+  const box = $('#loading-error');
+  if (box) {
+    box.hidden = false;
+    box.innerHTML = 'Não foi possível iniciar o aplicativo. <button type="button" onclick="location.reload()">Tentar novamente</button>';
+  }
+});

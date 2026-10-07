@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SinalizaAção — Animais em Voga · Realidade Aumentada</title>
+<meta name="description" content="Livro em Realidade Aumentada e jogo de cartas do SinalizaAção: Animais em Voga — animais em 3D e LIBRAS.">
+<meta name="theme-color" content="#0f3323">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SinalizaAção">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png">
+<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<link rel="preload" href="assets/fonts/baloo2-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/img/logo.webp" as="image">
+<link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+<a class="skip-link" href="#app">Pular para o conteúdo</a>
+<div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<div id="toasts" class="toasts"></div>
+
+<!-- ============================================================ CARREGAMENTO -->
+<div id="loading" class="loading" role="status" aria-live="polite">
+  <div class="loading__glow" aria-hidden="true"></div>
+  <img class="loading__logo" src="assets/img/logo.webp" alt="SinalizaAção — Animais em Voga" width="322" height="194">
+  <p class="loading__subtitle">Animais em Voga</p>
+  <div class="loading__animals" aria-hidden="true"><span>🐝</span><span>🐘</span><span>🦎</span><span>🐆</span><span>🐻</span></div>
+  <div class="progress" aria-hidden="true"><div class="progress__bar" id="loading-bar"></div></div>
+  <p class="loading__text" id="loading-text">Preparando sua experiência...</p>
+  <noscript><p class="loading__error">Para usar o aplicativo, ative o JavaScript no navegador.</p></noscript>
+  <p class="loading__error" id="loading-error" hidden></p>
+</div>
+
+<main id="app" class="app">
+
+  <!-- ========================================================== MENU -->
+  <section class="screen screen--menu" data-screen="menu" aria-labelledby="menu-title" hidden>
+    <div class="scenery" aria-hidden="true">
+      <div class="scenery__bg"></div>
+      <div class="scenery__shade"></div>
+      <div class="leaves"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="menu">
+      <div class="menu__hero">
+        <h1 id="menu-title" class="menu__logo-wrap">
+          <img class="menu__logo" src="assets/img/logo.webp" alt="SinalizaAção — Animais em Voga" width="322" height="194">
+        </h1>
+        <p class="menu__tagline">Explore os animais de <strong>Signária</strong> em <span class="nowrap">Realidade Aumentada</span> e <strong>LIBRAS</strong>!</p>
+        <img class="menu__aia" src="assets/img/aia.webp" alt="" width="429" height="680" loading="lazy">
+      </div>
+      <nav class="menu__panel" aria-label="Menu principal">
+        <a class="menu-btn menu-btn--book" href="#/livro">
+          <span class="menu-btn__icon" aria-hidden="true">📖</span>
+          <span class="menu-btn__text">
+            <span class="menu-btn__title">LIVRO EM AR</span>
+            <span class="menu-btn__sub">Veja as páginas ganharem vida</span>
+          </span>
+          <span class="menu-btn__arrow" aria-hidden="true">›</span>
+        </a>
+        <a class="menu-btn menu-btn--game" href="#/jogo">
+          <span class="menu-btn__icon" aria-hidden="true">🃏</span>
+          <span class="menu-btn__text">
+            <span class="menu-btn__title">JOGO DE CARTAS</span>
+            <span class="menu-btn__sub">Encontre a carta e ganhe pontos</span>
+          </span>
+          <span class="menu-btn__arrow" aria-hidden="true">›</span>
+        </a>
+        <div class="menu__links">
+          <a class="link-btn" data-link="store" href="https://loja.inclusivr.com.br/" target="_blank" rel="noopener">
+            <span aria-hidden="true">📚</span>
+            <span><strong>NÃO TEM O LIVRO?</strong> CLIQUE AQUI</span>
+          </a>
+          <a class="link-btn" data-link="site" href="http://inclusivr.com.br/" target="_blank" rel="noopener">
+            <span aria-hidden="true">🌐</span>
+            <span>CONHEÇA NOSSO SITE</span>
+          </a>
+        </div>
+        <button class="install-btn" type="button" data-action="install" hidden>📲 Instalar o aplicativo</button>
+      </nav>
+      <p class="menu__footer">InclusiVR · SinalizaAção: Animais em Voga</p>
+    </div>
+  </section>
+
+  <!-- ========================================================== INSTRUÇÕES: LIVRO -->
+  <section class="screen screen--intro" data-screen="book-intro" aria-labelledby="book-intro-title" hidden>
+    <div class="scenery scenery--dim" aria-hidden="true"><div class="scenery__bg"></div><div class="scenery__shade"></div></div>
+    <div class="intro">
+      <article class="intro__card">
+        <header class="intro__head">
+          <h1 id="book-intro-title" class="intro__title">Olá! <span class="wave" aria-hidden="true">👋</span></h1>
+          <h2 class="intro__subtitle">Bem-vindo ao aplicativo de Realidade Aumentada (AR) do <strong>SinalizaAção: Animais em Voga!</strong></h2>
+          <p class="intro__lead">Aponte seu celular para as páginas do livro e veja cada página <strong>ganhar vida! ✨</strong></p>
+        </header>
+        <figure class="intro__art" aria-label="Ilustração: o celular a cerca de 30 centímetros da página do livro mostra o animal em 3D">
+          <div class="art-scene" aria-hidden="true">
+            <div class="art-scene__phone">
+              <div class="art-scene__screen">
+                <img src="assets/img/pagina-exemplo.webp" alt="" width="480" height="338">
+                <span class="art-scene__mini">🐘</span>
+                <span class="art-scene__scan"></span>
+              </div>
+            </div>
+            <span class="art-tag art-tag--phone">📱 CELULAR</span>
+            <div class="art-scene__measure"><span>~ 30 cm</span></div>
+            <div class="art-scene__animal"><span>🐘</span><i>✨</i></div>
+            <span class="art-tag art-tag--animal">🐾 ANIMAL 3D</span>
+            <div class="art-scene__page"><img src="assets/img/pagina-exemplo.webp" alt="" width="480" height="338"></div>
+            <span class="art-tag art-tag--page">📖 PÁGINA DO LIVRO</span>
+            <div class="art-scene__friends"><span>🐝</span><span>🦎</span><span>🐆</span><span>🐻</span></div>
+          </div>
+        </figure>
+        <div class="intro__body">
+          <h3 class="intro__h3">Como utilizar:</h3>
+          <ul class="steps">
+            <li><span class="steps__icon" aria-hidden="true">📱</span><span>Aponte o celular para uma das páginas do livro.</span></li>
+            <li><span class="steps__icon" aria-hidden="true">📏</span><span>Mantenha o celular aproximadamente <strong>30 cm de distância</strong> da página.</span></li>
+            <li><span class="steps__icon" aria-hidden="true">👀</span><span>Aguarde o reconhecimento.</span></li>
+            <li><span class="steps__icon" aria-hidden="true">🐾</span><span>Veja o animal aparecer em Realidade Aumentada!</span></li>
+          </ul>
+          <p class="intro__extra"><span aria-hidden="true">✋</span> Toque em <strong>Interagir</strong> para tirar o animal da página e girar, aproximar e explorar com os dedos. <span aria-hidden="true">🎥</span> O vídeo em <strong>LIBRAS</strong> mostra o sinal de cada animal.</p>
+          <p class="intro__fun">Divirta-se explorando os animais de Signária!</p>
+        </div>
+      </article>
+      <div class="intro__actions">
+        <button class="btn btn--primary btn--xl" type="button" data-action="start-book">🚀 COMEÇAR EXPERIÊNCIA</button>
+        <a class="btn btn--ghost" href="#/">← VOLTAR</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== INSTRUÇÕES: JOGO -->
+  <section class="screen screen--intro" data-screen="game-intro" aria-labelledby="game-intro-title" hidden>
+    <div class="scenery scenery--dim" aria-hidden="true"><div class="scenery__bg"></div><div class="scenery__shade"></div></div>
+    <div class="intro">
+      <article class="intro__card">
+        <header class="intro__head">
+          <h1 id="game-intro-title" class="intro__title"><span aria-hidden="true">🃏</span> Como jogar?</h1>
+        </header>
+        <figure class="intro__art" aria-label="Ilustração: carta sorteada, procurar, escanear, acerto com pontos e próxima carta">
+          <ol class="art-flow" aria-hidden="true">
+            <li class="art-flow__step">
+              <span class="art-flow__visual art-card"><img src="assets/img/carta-exemplo-2.webp" alt="" width="220" height="310"></span>
+              <span class="art-flow__label">CARTA SORTEADA</span>
+            </li>
+            <li class="art-flow__step">
+              <span class="art-flow__visual art-search"><i></i><i></i><i></i><b>🔎</b></span>
+              <span class="art-flow__label">PROCURE</span>
+            </li>
+            <li class="art-flow__step">
+              <span class="art-flow__visual art-scan"><b>📱</b><i></i></span>
+              <span class="art-flow__label">ESCANEIE</span>
+            </li>
+            <li class="art-flow__step">
+              <span class="art-flow__visual art-hit">✓ ACERTO<small>+ PONTOS</small></span>
+            </li>
+            <li class="art-flow__step">
+              <span class="art-flow__visual art-next"><img src="assets/img/carta-exemplo-16.webp" alt="" width="220" height="305"></span>
+              <span class="art-flow__label">PRÓXIMA</span>
+            </li>
+          </ol>
+        </figure>
+        <div class="intro__body">
+          <ol class="game-steps">
+            <li><h3>1. Sorteie uma carta</h3><p>O jogo escolherá automaticamente uma carta para você encontrar.</p></li>
+            <li><h3>2. Procure a carta</h3><p>Pegue as cartas e encontre aquela que foi sorteada.</p></li>
+            <li><h3>3. Aponte a câmera</h3><p>Aponte o celular para a carta encontrada e aguarde o reconhecimento.</p></li>
+            <li><h3>4. Acerte e ganhe pontos! 🎉</h3><p>Quanto mais rápido você acertar, maior será sua pontuação.</p></li>
+          </ol>
+          <div class="callout callout--warn"><h3>⚠️ Cuidado!</h3><p>Escanear uma carta errada fará você perder pontos.</p></div>
+          <div class="callout"><h3>⏭️ Não encontrou?</h3><p>Utilize o botão <strong>Pular</strong> para passar para outra carta.</p></div>
+          <p class="intro__note"><strong>O jogo funciona como um baralho:</strong> uma carta não será sorteada novamente até que as outras cartas do ciclo tenham sido utilizadas. <span data-card-count></span></p>
+        </div>
+      </article>
+      <div class="intro__actions">
+        <button class="btn btn--secondary btn--xl" type="button" data-action="continue-game" hidden>▶️ CONTINUAR JOGO <small data-continue-info></small></button>
+        <button class="btn btn--primary btn--xl" type="button" data-action="start-game">🎮 COMEÇAR JOGO</button>
+        <a class="btn btn--ghost" href="#/">← VOLTAR</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== LIVRO EM AR -->
+  <section class="screen screen--ar" data-screen="book-ar" aria-label="Livro em Realidade Aumentada" hidden>
+    <div class="ar-stage" data-ar-stage></div>
+    <div class="ar-ui">
+      <header class="ar-topbar">
+        <a class="chip-btn" href="#/" aria-label="Voltar ao menu">← Menu</a>
+        <div class="ar-title">📖 Livro em AR</div>
+        <div class="animal-chip" data-animal-chip hidden>
+          <span class="animal-chip__emoji" data-chip-emoji></span>
+          <span class="animal-chip__text"><strong data-chip-name></strong><small data-chip-page></small></span>
+        </div>
+      </header>
+
+      <div class="ar-scan" data-scan data-state="searching">
+        <div class="ar-scan__frame" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="ar-scan__line"></span></div>
+        <p class="ar-scan__text" data-scan-text aria-live="polite"></p>
+      </div>
+      <div class="model-loading" data-model-loading hidden><span class="spinner" aria-hidden="true"></span> 🐾 Preparando o animal...</div>
+      <div class="interact-hint" data-interact-hint hidden>
+        <span>☝️ Arraste para <strong>girar</strong></span>
+        <span>🤏 Pinça para <strong>aproximar</strong></span>
+        <span>👆👆 Dois toques: <strong>centralizar</strong></span>
+      </div>
+
+      <footer class="ar-controls" data-controls>
+        <div class="mode-switch" role="group" aria-label="Modo de visualização">
+          <button type="button" class="mode-switch__btn" data-action="mode-page" aria-pressed="true">📖 Modo Página</button>
+          <button type="button" class="mode-switch__btn" data-action="mode-interact" aria-pressed="false" disabled>✋ Interagir</button>
+        </div>
+        <div class="ar-controls__row">
+          <button type="button" class="ctrl-btn ctrl-btn--libras" data-action="libras" aria-pressed="true">🎥 <span data-libras-label>LIBRAS: ON</span></button>
+          <button type="button" class="ctrl-btn" data-action="reset" hidden aria-label="Centralizar o animal">⟲ Centralizar</button>
+        </div>
+      </footer>
+      <button type="button" class="libras-size" data-action="libras-size" hidden aria-label="Aumentar vídeo de LIBRAS">⤢</button>
+    </div>
+    <div class="ar-status" data-status hidden>
+      <div class="ar-status__card">
+        <span class="spinner spinner--lg" aria-hidden="true"></span>
+        <p data-status-text>Preparando a Realidade Aumentada...</p>
+        <div class="progress"><div class="progress__bar" data-status-bar></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== JOGO EM AR -->
+  <section class="screen screen--ar screen--game" data-screen="game-ar" aria-label="Jogo de cartas" hidden>
+    <div class="ar-stage" data-ar-stage></div>
+    <div class="ar-ui game-ui">
+      <header class="ar-topbar">
+        <a class="chip-btn" href="#/" aria-label="Voltar ao menu">← Menu</a>
+        <div class="ar-title">🃏 Jogo de Cartas</div>
+        <button type="button" class="chip-btn chip-btn--icon" data-action="sound" aria-pressed="true" aria-label="Desligar sons">🔊</button>
+      </header>
+
+      <section class="game-hud" aria-label="Placar do jogo">
+        <div class="target">
+          <div class="target__label">CARTA ALVO</div>
+          <div class="target__slot" data-target-slot>
+            <img class="target__img" data-target-img alt="" width="220" height="320">
+            <div class="target__back" aria-hidden="true"></div>
+          </div>
+          <div class="target__name" data-target-name></div>
+        </div>
+        <div class="hud-info">
+          <p class="hud-prompt" data-prompt aria-live="polite">Encontre esta carta!</p>
+          <div class="hud-clock">
+            <span aria-hidden="true">⏱</span>
+            <output data-clock aria-label="Tempo">00:00</output>
+            <span class="hud-bonus" data-bonus>+100 bônus</span>
+          </div>
+          <dl class="hud-stats">
+            <div><dt>Pontos</dt><dd data-stat="score">0</dd></div>
+            <div><dt>Acertos</dt><dd data-stat="hits">0</dd></div>
+            <div><dt>Erros</dt><dd data-stat="errors">0</dd></div>
+            <div><dt>Cartas</dt><dd data-stat="used">0/0</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <div class="ar-scan ar-scan--card" data-scan hidden>
+        <div class="ar-scan__frame" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="ar-scan__line"></span></div>
+        <p class="ar-scan__text"><strong>📱 Aponte a câmera para a carta</strong></p>
+      </div>
+
+      <footer class="ar-controls game-controls" data-controls>
+        <a class="btn btn--ghost btn--sm" href="#/">← Menu</a>
+        <button type="button" class="btn btn--primary btn--wide" data-action="skip" disabled>⏭️ PULAR</button>
+      </footer>
+    </div>
+
+    <div class="reveal" data-reveal hidden>
+      <div class="reveal__deck" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="reveal__card" data-reveal-card>
+        <img data-reveal-img alt="" width="300" height="440">
+      </div>
+      <p class="reveal__name" data-reveal-name></p>
+      <p class="reveal__text" data-reveal-text>Embaralhando...</p>
+    </div>
+    <div class="feedback" data-feedback hidden role="status"></div>
+
+    <div class="summary" data-summary hidden role="dialog" aria-modal="true" aria-labelledby="summary-title">
+      <div class="summary__card">
+        <div class="summary__icon" aria-hidden="true">🎉</div>
+        <h2 id="summary-title">CICLO COMPLETO!</h2>
+        <p class="summary__new-record" data-sum-new-record hidden>🏆 Novo recorde!</p>
+        <dl class="summary__stats">
+          <div><dt>Cartas utilizadas</dt><dd data-sum="used">0/0</dd></div>
+          <div><dt>Acertos</dt><dd data-sum="hits">0</dd></div>
+          <div><dt>Erros</dt><dd data-sum="errors">0</dd></div>
+          <div><dt>Puladas</dt><dd data-sum="skips">0</dd></div>
+          <div><dt>Melhor tempo</dt><dd data-sum="best">—</dd></div>
+          <div class="summary__score"><dt>Pontuação</dt><dd data-sum="score">0</dd></div>
+          <div><dt>Recorde</dt><dd data-sum="record">0</dd></div>
+        </dl>
+        <div class="summary__actions">
+          <button type="button" class="btn btn--primary btn--xl" data-action="new-deck">🔄 NOVO BARALHO</button>
+          <a class="btn btn--ghost" href="#/">← Menu</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ar-status" data-status hidden>
+      <div class="ar-status__card">
+        <span class="spinner spinner--lg" aria-hidden="true"></span>
+        <p data-status-text>Preparando o jogo...</p>
+        <div class="progress"><div class="progress__bar" data-status-bar></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script nomodule>
+  document.getElementById('loading-text').textContent = '';
+  var e = document.getElementById('loading-error');
+  e.hidden = false;
+  e.textContent = 'Seu navegador é muito antigo para este aplicativo. Atualize o Chrome (Android) ou o Safari (iPhone).';
+</script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
