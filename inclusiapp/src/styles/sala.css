@@ -99,7 +99,34 @@
 .orbit i:nth-of-type(4) { right: 6px; bottom: 6px; animation-delay: -2.2s; }
 .orbit em { position: absolute; left: calc(50% + 0.6em); top: 14px; font-style: normal; font-size: 1.1rem; animation: pulse 1.3s ease-in-out infinite; }
 
-/* jogo 3 — em breve (bloqueado) */
+/* jogo 3 — Sinalize e Conte (turquesa) */
+.game-tile--sign {
+  color: #08332d;
+  background: linear-gradient(160deg, #ecfffb 0%, #a6ece2 45%, #2fbfae 100%);
+  box-shadow: 0 7px 0 #137366, 0 16px 30px rgba(0, 0, 0, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.7);
+}
+.game-tile--sign:active { box-shadow: 0 3px 0 #137366, 0 8px 18px rgba(0, 0, 0, 0.4); }
+.game-tile--sign .game-tile__tag { color: rgba(8, 51, 45, 0.72); }
+.game-tile--sign .game-tile__cta { background: #08332d; color: #c9fff5; }
+.game-tile--sign::after { animation-delay: 4s; }
+.vowel-orbit { position: relative; display: block; width: 100%; height: 100%; font-family: var(--font-display); font-weight: 800; }
+.vowel-orbit b {
+  position: absolute; left: calc(50% - 0.5em); top: calc(50% - 0.6em); font-size: 3rem; line-height: 1;
+  animation: wave 2.4s ease-in-out infinite; transform-origin: 70% 80%; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.22));
+}
+.vowel-orbit i {
+  position: absolute; display: grid; place-items: center; width: 1.55em; height: 1.55em; border-radius: 50%;
+  font-style: normal; font-size: 0.95rem; line-height: 1; background: #fff; color: #0f6d62;
+  box-shadow: 0 3px 0 rgba(8, 51, 45, 0.18); animation: float 3s ease-in-out infinite;
+}
+.vowel-orbit i:nth-of-type(1) { left: 6%; top: 8%; }
+.vowel-orbit i:nth-of-type(2) { right: 6%; top: 6%; animation-delay: -0.6s; }
+.vowel-orbit i:nth-of-type(3) { left: 2%; top: 46%; animation-delay: -1.2s; }
+.vowel-orbit i:nth-of-type(4) { right: 2%; top: 44%; animation-delay: -1.8s; }
+.vowel-orbit i:nth-of-type(5) { left: calc(50% - 0.78em); bottom: 2%; animation-delay: -2.4s; }
+.vowel-orbit em { position: absolute; right: 12%; bottom: 8%; font-style: normal; font-size: 1.1rem; animation: hop 1.8s ease-in-out infinite; }
+
+/* cartão "em breve" (bloqueado) — reservado para um próximo jogo */
 .game-tile--soon {
   grid-template-areas: "art body"; cursor: not-allowed;
   color: rgba(255, 247, 227, 0.92); background: rgba(7, 23, 15, 0.6);
@@ -147,6 +174,9 @@
   .fan img:nth-child(2) { transform: translate(-50%, -50%) translateX(16px) rotate(15deg); }
   .orbit b { font-size: 2rem; }
   .orbit i { font-size: 0.95rem; }
+  .vowel-orbit b { font-size: 2rem; }
+  .vowel-orbit i { font-size: 0.66rem; }
+  .vowel-orbit em { font-size: 0.8rem; }
   .mystery { font-size: 2rem; }
   .sala__actions .btn { min-height: 42px; }
 }
@@ -171,5 +201,8 @@
   .fan img:nth-child(2) { transform: translate(-50%, -50%) translateX(36px) rotate(15deg); }
   .orbit b { font-size: 4.4rem; }
   .orbit i { font-size: 1.8rem; }
+  .vowel-orbit b { font-size: 4.4rem; }
+  .vowel-orbit i { font-size: 1.3rem; }
+  .vowel-orbit em { font-size: 1.6rem; }
   .mystery { font-size: 4rem; }
 }

@@ -4,13 +4,14 @@
  *
  *  - código e páginas (html/js/css/json): rede primeiro, cache como reserva
  *    → atualizações aparecem assim que publicadas;
- *  - arquivos pesados e estáveis (modelos, alvos, imagens, fontes): cache
- *    primeiro, atualizando em segundo plano;
+ *  - arquivos pesados e estáveis (modelos, alvos, imagens, fontes e o
+ *    reconhecimento de mãos do MediaPipe — .wasm/.task): cache primeiro,
+ *    atualizando em segundo plano;
  *  - vídeos (.mp4): sempre pela rede (o navegador cuida do streaming/Range).
  *
  * Ao publicar mudanças grandes, aumente VERSION para descartar caches antigos.
  */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CODE_CACHE = `sinalizaacao-code-${VERSION}`;
 const ASSET_CACHE = `sinalizaacao-assets-${VERSION}`;
 
@@ -26,7 +27,7 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-const HEAVY = /\.(glb|mind|gz|webp|png|jpe?g|woff2)$/i;
+const HEAVY = /\.(glb|mind|gz|webp|png|jpe?g|woff2|wasm|task)$/i;
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;

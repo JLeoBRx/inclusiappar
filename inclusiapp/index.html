@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SinalizaAção — Animais em Voga · Realidade Aumentada</title>
-<meta name="description" content="Livro em Realidade Aumentada e Sala de Jogos (Jogo de Cartas e Bichinho Virtual) do SinalizaAção: Animais em Voga — animais em 3D e LIBRAS.">
+<meta name="description" content="Livro em Realidade Aumentada e Sala de Jogos (Jogo de Cartas, Bichinho Virtual e Sinalize e Conte) do SinalizaAção: Animais em Voga — animais em 3D e LIBRAS.">
 <meta name="theme-color" content="#0f3323">
 <meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="src/styles/main.css">
 <link rel="stylesheet" href="src/styles/sala.css">
 <link rel="stylesheet" href="src/styles/pet.css">
+<link rel="stylesheet" href="src/styles/sign.css">
 </head>
 <body>
 <a class="skip-link" href="#app">Pular para o conteúdo</a>
@@ -359,14 +360,18 @@
           </span>
           <span class="game-tile__cta" aria-hidden="true">JOGAR ›</span>
         </a>
-        <button class="game-tile game-tile--soon" type="button" aria-disabled="true" data-action="soon">
-          <span class="game-tile__art" aria-hidden="true"><span class="mystery">🎁<b>🔒</b></span></span>
-          <span class="game-tile__body">
-            <span class="game-tile__tag">JOGO 3</span>
-            <span class="game-tile__title"><span aria-hidden="true">🔒</span> Em breve</span>
-            <span class="game-tile__text">Um novo jogo está chegando. Aguarde as novidades!</span>
+        <a class="game-tile game-tile--sign" href="#/sinalize">
+          <span class="game-tile__art" aria-hidden="true">
+            <span class="vowel-orbit"><b>✋</b><i>A</i><i>E</i><i>I</i><i>O</i><i>U</i><em>🐝</em></span>
           </span>
-        </button>
+          <span class="game-tile__body">
+            <span class="game-tile__tag">JOGO 3 <span class="game-tile__new">NOVO!</span></span>
+            <span class="game-tile__title"><span aria-hidden="true">✋</span> Sinalize e Conte</span>
+            <span class="game-tile__text">Faça o sinal da vogal em LIBRAS e conte os animais!</span>
+            <span class="game-tile__meta" data-tile-meta="sign"></span>
+          </span>
+          <span class="game-tile__cta" aria-hidden="true">JOGAR ›</span>
+        </a>
       </nav>
       <div class="sala__actions"><a class="btn btn--ghost" href="#/">← VOLTAR</a></div>
     </div>
@@ -576,6 +581,212 @@
         </header>
         <p class="pet-book__intro">Cada carta tem uma magia! <strong data-book-count></strong></p>
         <div class="pet-book__groups" data-book-groups></div>
+      </div>
+    </div>
+  </section>
+  <!-- ========================================================== SINALIZE E CONTE: COMO JOGAR -->
+  <section class="screen screen--intro" data-screen="sign-intro" aria-labelledby="sign-intro-title" hidden>
+    <div class="scenery scenery--dim" aria-hidden="true"><div class="scenery__bg"></div><div class="scenery__shade"></div></div>
+    <div class="intro">
+      <article class="intro__card intro__card--sign">
+        <header class="intro__head">
+          <h1 id="sign-intro-title" class="intro__title"><span class="wave" aria-hidden="true">✋</span> COMO JOGAR?</h1>
+          <p class="intro__lead">Faça o sinal da vogal em <strong>LIBRAS</strong> e conte os animais de <strong>Signária</strong>!&nbsp;<span aria-hidden="true">🐾</span></p>
+        </header>
+        <figure class="intro__art sign-art" aria-label="Ilustração: carta sorteada, escanear a carta, fazer o sinal com a mão, contar os animais e responder">
+          <ol class="sign-flow" aria-hidden="true">
+            <li class="sign-flow__step">
+              <span class="sign-flow__visual sign-flow__card"><img src="assets/img/cartas-mini/carta11.webp" alt="" width="120" height="169"><b>A</b></span>
+              <span class="sign-flow__label">CARTA</span>
+            </li>
+            <li class="sign-flow__step">
+              <span class="sign-flow__visual sign-flow__scan"><b>📱</b><i></i></span>
+              <span class="sign-flow__label">ESCANEIE</span>
+            </li>
+            <li class="sign-flow__step">
+              <span class="sign-flow__visual sign-flow__hand"><b>✋</b><em>✨</em></span>
+              <span class="sign-flow__label">FAÇA O SINAL</span>
+            </li>
+            <li class="sign-flow__step">
+              <span class="sign-flow__visual sign-flow__animals"><i>🐝</i><i>🐝</i></span>
+              <span class="sign-flow__label">CONTE</span>
+            </li>
+            <li class="sign-flow__step">
+              <span class="sign-flow__visual sign-flow__answer"><i>1</i><i>2</i><i>3</i></span>
+              <span class="sign-flow__label">RESPONDA</span>
+            </li>
+          </ol>
+        </figure>
+        <div class="intro__body">
+          <ol class="sign-steps">
+            <li class="sign-step">
+              <span class="sign-step__num" aria-hidden="true">1</span>
+              <span class="sign-step__icon" aria-hidden="true">🃏</span>
+              <div class="sign-step__text"><h3>Pegue a carta sorteada</h3><p>O jogo irá informar qual vogal deverá ser encontrada.</p></div>
+            </li>
+            <li class="sign-step">
+              <span class="sign-step__num" aria-hidden="true">2</span>
+              <span class="sign-step__icon" aria-hidden="true">📷</span>
+              <div class="sign-step__text"><h3>Escaneie a carta</h3><p>Aponte a câmera para a carta correspondente.</p></div>
+            </li>
+            <li class="sign-step sign-step--hand">
+              <span class="sign-step__num" aria-hidden="true">3</span>
+              <span class="sign-step__icon" aria-hidden="true">✋</span>
+              <div class="sign-step__text"><h3>Faça o sinal</h3><p>Depois que a carta for reconhecida, coloque a mão na frente da câmera e faça o mesmo sinal em LIBRAS.</p></div>
+            </li>
+            <li class="sign-step">
+              <span class="sign-step__num" aria-hidden="true">4</span>
+              <span class="sign-step__icon" aria-hidden="true">✅</span>
+              <div class="sign-step__text"><h3>Acerte o sinal</h3><p>O MediaPipe irá analisar a posição da mão.</p></div>
+            </li>
+            <li class="sign-step">
+              <span class="sign-step__num" aria-hidden="true">5</span>
+              <span class="sign-step__icon" aria-hidden="true">🐾</span>
+              <div class="sign-step__text"><h3>Conte os animais</h3><p>Depois que o sinal estiver correto, aparecerão 1, 2 ou 3 animais.</p></div>
+            </li>
+            <li class="sign-step">
+              <span class="sign-step__num" aria-hidden="true">6</span>
+              <span class="sign-step__icon" aria-hidden="true">🔢</span>
+              <div class="sign-step__text">
+                <h3>Responda</h3>
+                <p>Escolha a quantidade correta:</p>
+                <p class="sign-step__answers" aria-hidden="true"><span>1</span><span>2</span><span>3</span></p>
+              </div>
+            </li>
+          </ol>
+          <div class="callout callout--star">
+            <h3>⭐ Pontuação</h3>
+            <p>Quanto mais rápido e preciso o jogador for, maior será a pontuação.</p>
+            <ul class="sign-points" data-scoring></ul>
+          </div>
+          <section class="sign-vowels-box" aria-labelledby="sign-vowels-title">
+            <h3 id="sign-vowels-title" class="intro__h3">🔤 As vogais e seus animais</h3>
+            <ul class="sign-vowels" data-vowels></ul>
+          </section>
+          <div class="callout callout--tip">
+            <h3>💡 Dicas para a câmera ver bem a sua mão</h3>
+            <p>Fique num lugar iluminado, mostre a <strong>mão inteira</strong> na tela e segure o sinal parado por um instante.</p>
+          </div>
+          <section class="sign-records" data-records aria-labelledby="sign-records-title">
+            <h3 id="sign-records-title">🏆 SEUS RECORDES</h3>
+            <dl class="sign-records__list" data-records-list hidden></dl>
+            <p class="sign-records__totals" data-records-totals hidden></p>
+            <p class="sign-records__empty" data-records-empty>Jogue a primeira partida para criar seus recordes!</p>
+          </section>
+          <p class="intro__note"><strong>💾 Os recordes ficam salvos neste aparelho.</strong> As imagens da câmera são analisadas aqui mesmo e não são enviadas para a internet.</p>
+        </div>
+      </article>
+      <div class="intro__actions">
+        <button class="btn btn--primary btn--xl" type="button" data-action="start-sign">🎮 INICIAR</button>
+        <a class="btn btn--ghost" href="#/sala">← VOLTAR</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== SINALIZE E CONTE: JOGO -->
+  <section class="screen screen--ar screen--sign" data-screen="sign-game" aria-label="Sinalize e Conte" hidden>
+    <div class="ar-stage" data-ar-stage></div>
+    <canvas class="sg-hands" data-hands aria-hidden="true"></canvas>
+    <div class="ar-ui sg-ui">
+      <header class="ar-topbar">
+        <a class="chip-btn" href="#/sala" aria-label="Voltar à Sala de Jogos">← Sala</a>
+        <div class="ar-title">✋ Sinalize e Conte</div>
+        <a class="chip-btn chip-btn--icon sg-help" href="#/sinalize" aria-label="Como jogar">❓</a>
+        <button type="button" class="chip-btn chip-btn--icon" data-action="sound" aria-pressed="true" aria-label="Desligar sons">🔊</button>
+      </header>
+
+      <section class="sg-hud" aria-label="Placar">
+        <div class="sg-card">
+          <div class="sg-card__label">🃏 CARTA</div>
+          <div class="target__slot sg-card__slot" data-card-slot>
+            <img class="target__img" data-card-img alt="" width="220" height="310">
+            <div class="target__back" aria-hidden="true"></div>
+            <b class="sg-card__letter" data-card-letter aria-hidden="true"></b>
+          </div>
+        </div>
+        <div class="sg-hud__info">
+          <div class="sg-round">RODADA <strong data-round>1</strong>/<span data-rounds>5</span></div>
+          <dl class="sg-stats">
+            <div><dt>⭐ Pontos</dt><dd data-score>0</dd></div>
+            <div><dt>⏱️ Tempo</dt><dd data-clock>00:00</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 📷 escanear a carta -->
+      <div class="ar-scan ar-scan--card sg-scan" data-step="scan" hidden>
+        <div class="ar-scan__frame" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="ar-scan__line"></span></div>
+        <p class="ar-scan__text"><strong data-scan-title>📷 Escaneie a carta</strong><span class="sg-scan__hint" data-scan-hint aria-live="polite">Aponte a câmera para a carta</span></p>
+        <button type="button" class="btn btn--secondary btn--sm sg-skip" data-action="skip-scan" hidden>⏭️ Fazer o sinal sem a carta</button>
+      </div>
+
+      <!-- ✋ fazer o sinal -->
+      <section class="sg-panel sg-sign" data-step="sign" aria-label="Faça o sinal" hidden>
+        <img class="sg-sign__card" data-sign-card alt="" width="120" height="169">
+        <div class="sg-sign__body">
+          <h2 class="sg-sign__title"><span aria-hidden="true">✋</span> <span data-sign-title>Faça o sinal</span></h2>
+          <p class="sg-sign__status" data-sign-status data-state="idle" aria-live="polite">✋ Coloque a mão na frente da câmera</p>
+          <div class="sg-meter" data-meter aria-hidden="true"><i></i></div>
+          <div class="sg-timer"><span aria-hidden="true">⏱️</span> <output data-sign-clock>0,0 s</output> <span class="hud-bonus" data-sign-bonus>+50 rapidez</span></div>
+          <div class="sg-sign__actions">
+            <button type="button" class="btn btn--secondary btn--sm" data-sign-error data-action="retry-hands" hidden>🔄 Tentar novamente</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-action="skip-sign" hidden>⏭️ Pular este sinal</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 🐾 os animais aparecendo -->
+      <div class="sg-watch" data-step="watch" hidden><p data-watch-text>👀 Olhe com atenção!</p></div>
+
+      <!-- 🔢 contar -->
+      <section class="sg-panel sg-count" data-step="count" aria-label="Conte os animais" hidden>
+        <p class="sg-count__fallback" data-fallback-animals hidden></p>
+        <h2 class="sg-count__q" data-question>Quantos animais apareceram?</h2>
+        <div class="sg-answers" role="group" aria-label="Escolha a quantidade" data-answers></div>
+        <div class="sg-timer"><span aria-hidden="true">⏱️</span> <output data-count-clock>0,0 s</output> <span class="hud-bonus" data-count-bonus>+30 rapidez</span></div>
+      </section>
+
+      <div class="sg-flash" data-flash role="status" hidden></div>
+    </div>
+
+    <div class="reveal sg-reveal" data-reveal hidden>
+      <div class="reveal__deck" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="reveal__card"><img data-reveal-img alt="" width="300" height="440"><b class="sg-reveal__letter" data-reveal-letter aria-hidden="true"></b></div>
+      <p class="reveal__name" data-reveal-name></p>
+      <p class="reveal__text" data-reveal-text>Sorteando a carta...</p>
+    </div>
+    <div class="feedback" data-feedback hidden role="status"></div>
+
+    <div class="summary sg-summary" data-summary hidden role="dialog" aria-modal="true" aria-labelledby="sg-summary-title">
+      <div class="summary__card">
+        <div class="summary__icon" aria-hidden="true">🎉</div>
+        <h2 id="sg-summary-title">PARTIDA CONCLUÍDA!</h2>
+        <p class="summary__new-record" data-sum-new-record hidden>🏆 Novo recorde!</p>
+        <p class="sg-rank"><span class="sg-rank__medal" data-sum-medal aria-hidden="true"></span> <span data-sum-rank></span></p>
+        <dl class="summary__stats">
+          <div class="summary__score"><dt>⭐ Pontuação</dt><dd data-sum="score">0</dd></div>
+          <div><dt>⏱️ Tempo total</dt><dd data-sum="time">—</dd></div>
+          <div><dt>✋ Sinais corretos</dt><dd data-sum="signs">0/5</dd></div>
+          <div><dt>🔢 Contagens corretas</dt><dd data-sum="counts">0/5</dd></div>
+          <div><dt>🔥 Sequência</dt><dd data-sum="streak">0</dd></div>
+        </dl>
+        <ol class="sg-rounds" data-sum-rounds aria-label="Rodadas da partida"></ol>
+        <section class="sign-records sign-records--summary" aria-labelledby="sg-records-title">
+          <h3 id="sg-records-title">🏆 SEUS RECORDES</h3>
+          <dl class="sign-records__list" data-sum-records></dl>
+        </section>
+        <div class="summary__actions">
+          <button type="button" class="btn btn--primary btn--xl" data-action="replay">🔄 Jogar novamente</button>
+          <a class="btn btn--ghost" href="#/sala">← Sala de Jogos</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ar-status" data-status hidden>
+      <div class="ar-status__card">
+        <span class="spinner spinner--lg" aria-hidden="true"></span>
+        <p data-status-text>Preparando o jogo...</p>
+        <div class="progress"><div class="progress__bar" data-status-bar></div></div>
       </div>
     </div>
   </section>

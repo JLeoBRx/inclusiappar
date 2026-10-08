@@ -1,5 +1,5 @@
 /**
- * SALA DE JOGOS: Jogo de Cartas, Bichinho Virtual e o próximo jogo (em breve).
+ * SALA DE JOGOS: Jogo de Cartas, Bichinho Virtual e Sinalize e Conte.
  *
  * Os cartões mostram um resumo do progresso salvo de cada jogo — só leitura:
  * nada aqui muda o funcionamento dos jogos.
@@ -9,6 +9,7 @@ import { PETS } from '../pet/petConfig.js';
 import { hasSavedState, loadState, petStatus, simulate } from '../pet/petState.js';
 import { storage } from './storage.js';
 import { toast } from './notifications.js';
+import { loadRecords } from '../sign/signRecords.js';
 
 /** Quantos bichinhos precisam de cuidado agora (prévia, sem sortear doenças). */
 export function petsNeedingCare() {
@@ -22,8 +23,9 @@ export function petsNeedingCare() {
 }
 
 export function setupSala(screen) {
+  // cartão "🔒 Em breve" (para um próximo jogo), se houver
   const soon = screen.querySelector('[data-action="soon"]');
-  soon.addEventListener('click', () => {
+  soon?.addEventListener('click', () => {
     toast('🔒 Em breve! Um novo jogo está sendo preparado para você.', { duration: 3200 });
     soon.classList.remove('is-locked');
     void soon.offsetWidth;
@@ -31,6 +33,7 @@ export function setupSala(screen) {
   });
   const cardsMeta = screen.querySelector('[data-tile-meta="cards"]');
   const petMeta = screen.querySelector('[data-tile-meta="pet"]');
+  const signMeta = screen.querySelector('[data-tile-meta="sign"]');
   const sala = screen.querySelector('.sala');
 
   return {
@@ -46,6 +49,11 @@ export function setupSala(screen) {
       if (!pets) petMeta.textContent = '✨ Novidade! Cuide dos 5 animais';
       else if (pets.needy) petMeta.textContent = `🐾 ${pets.needy} bichinho${pets.needy > 1 ? 's precisam' : ' precisa'} de você!`;
       else petMeta.textContent = `⭐ ${pets.stars} estrelas · todos bem!`;
+
+      if (signMeta) {
+        const records = loadRecords(storage);
+        signMeta.textContent = records.matches ? `🏆 Recorde: ${records.bestScore} pontos` : '✨ Novidade! Sinais + contagem';
+      }
 
       sala.classList.remove('is-entering');
       requestAnimationFrame(() => sala.classList.add('is-entering'));

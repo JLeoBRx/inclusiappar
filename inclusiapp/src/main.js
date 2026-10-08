@@ -4,7 +4,7 @@
  *   MENU ─┬─ 📖 LIVRO ─────────── explicação ─ AR (páginas → animais 3D + LIBRAS)
  *         └─ 🎮 SALA DE JOGOS ─┬─ 🃏 JOGO DE CARTAS ─── explicação ─ AR (cartas → pontos)
  *                              ├─ 🐾 BICHINHO VIRTUAL ─ como jogar ─ quarto + cartas mágicas (AR)
- *                              └─ 🔒 EM BREVE
+ *                              └─ ✋ SINALIZE E CONTE ─ como jogar ─ AR (carta → sinal → contar)
  */
 import { Router } from './router.js';
 import { BookExperience } from './ar/bookAR.js';
@@ -15,6 +15,8 @@ import { setupBookIntro, setupGameIntro } from './ui/instructions.js';
 import { setupSala } from './ui/sala.js';
 import { PetGame } from './pet/petGame.js';
 import { setupPetIntro } from './pet/petIntro.js';
+import { SignGame } from './sign/signGame.js';
+import { setupSignIntro } from './sign/signIntro.js';
 import { toast } from './ui/notifications.js';
 
 const params = new URLSearchParams(location.search);
@@ -28,6 +30,8 @@ const screens = {
   sala: $('[data-screen="sala"]'),
   petIntro: $('[data-screen="pet-intro"]'),
   petGame: $('[data-screen="pet-game"]'),
+  signIntro: $('[data-screen="sign-intro"]'),
+  signGame: $('[data-screen="sign-game"]'),
 };
 
 /* ---------------------------------------------------------------- loading */
@@ -60,6 +64,7 @@ function withTimeout(promise, ms) {
 const book = new BookExperience(screens.bookAR);
 const game = new GameExperience(screens.gameAR);
 const pet = new PetGame(screens.petGame);
+const sign = new SignGame(screens.signGame);
 let permit = null; // rota AR liberada por um toque em "Começar"
 let resumeGame = false;
 
@@ -120,6 +125,25 @@ const router = new Router({
     enter: () => pet.enter(),
     leave: () => pet.leave(),
   },
+  sinalize: {
+    screen: screens.signIntro,
+    ...setupSignIntro(screens.signIntro, {
+      start: () => {
+        permit = 'sinalize/jogar';
+        router.go('sinalize/jogar');
+      },
+    }),
+  },
+  // a câmera só abre depois de "Iniciar" (abrir o link direto leva ao "Como jogar?")
+  'sinalize/jogar': {
+    screen: screens.signGame,
+    guard: () => (permit === 'sinalize/jogar' ? null : 'sinalize'),
+    enter: () => sign.enter(),
+    leave: () => {
+      permit = null;
+      return sign.leave();
+    },
+  },
 });
 
 /* ---------------------------------------------------------------- boot */
@@ -159,7 +183,7 @@ window.addEventListener('error', (event) => {
 });
 window.addEventListener('offline', () => toast('📶 Você está sem internet. O que já foi carregado continua funcionando.', { type: 'warning' }));
 
-if (params.has('test')) window.__app = { router, book, game, pet };
+if (params.has('test')) window.__app = { router, book, game, pet, sign };
 
 boot().catch((err) => {
   console.error(err);
