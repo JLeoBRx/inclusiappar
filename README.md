@@ -15,10 +15,15 @@ funcional em tablets e computadores):
     higiene, diversão, sono e saúde). As **cartas de LIBRAS são mágicas**: cada
     carta reconhecida pela câmera faz uma ação no jogo (dar mel, dar banho, curar...).
     Os bichinhos continuam vivendo com o app fechado e o progresso fica salvo no aparelho.
-  - **🔒 Em breve** — espaço reservado para o próximo jogo.
+  - **✋ Sinalize e Conte** — o jogo sorteia uma vogal; a criança escaneia a carta
+    da vogal em LIBRAS e **faz o sinal com a própria mão** na frente da câmera (o
+    [MediaPipe](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker)
+    confere o sinal). Aí aparecem **1, 2 ou 3 animais em 3D** para contar. Quanto mais
+    rápido e preciso, mais pontos; 5 rodadas por partida e recordes salvos no aparelho.
 
 Tudo roda no navegador, sem instalar nada: [MindAR](https://github.com/hiukim/mind-ar-js)
-(reconhecimento de imagens) + [Three.js](https://threejs.org/) (3D) + HTML/CSS/JS.
+(reconhecimento de imagens) + [Three.js](https://threejs.org/) (3D) +
+[MediaPipe](https://ai.google.dev/edge/mediapipe) (mãos, no Sinalize e Conte) + HTML/CSS/JS.
 
 | Menu | Livro em AR (animal 3D + LIBRAS) | Modo Interação | Jogo de Cartas |
 |---|---|---|---|
@@ -28,12 +33,16 @@ Tudo roda no navegador, sem instalar nada: [MindAR](https://github.com/hiukim/mi
 |---|---|---|---|
 | ![Sala](docs/screenshots/sala.jpg) | ![Como jogar](docs/screenshots/bichinho-como-jogar.jpg) | ![Quarto](docs/screenshots/bichinho-quarto.jpg) | ![Magia](docs/screenshots/bichinho-magia.jpg) |
 
+| Sinalize e Conte: como jogar | Faça o sinal (MediaPipe) | Conte os animais | Resultado e recordes |
+|---|---|---|---|
+| ![Como jogar](docs/screenshots/sinalize-como-jogar.jpg) | ![Sinal](docs/screenshots/sinalize-sinal.jpg) | ![Contar](docs/screenshots/sinalize-contar.jpg) | ![Resultado](docs/screenshots/sinalize-resultado.jpg) |
+
 ---
 
 ## 1. Como abrir
 
 **Publicado (recomendado):** a câmera só funciona em endereços `https://`. Com o
-GitHub Pages ativado (seção 10), o app fica em
+GitHub Pages ativado (seção 11), o app fica em
 `https://<usuário>.github.io/inclusiappar/` — a raiz redireciona para `inclusiapp/`.
 
 **No computador, para desenvolver:**
@@ -57,7 +66,7 @@ testar num celular, use o endereço publicado (HTTPS).
 │   ├── sw.js                   service worker (cache para visitas seguintes)
 │   ├── src/
 │   │   ├── main.js             inicialização, rotas, pré-carregamento
-│   │   ├── router.js           navegação (#/, #/livro, #/sala, #/jogo, #/bichinho ...)
+│   │   ├── router.js           navegação (#/, #/livro, #/sala, #/jogo, #/bichinho, #/sinalize ...)
 │   │   ├── config.js           ★ CONFIGURAÇÃO CENTRAL
 │   │   ├── lib/three.js        ponto único de importação do Three.js
 │   │   ├── ar/
@@ -84,14 +93,25 @@ testar num celular, use o endereço publicado (HTTPS).
 │   │   │   ├── petGame.js      tela do jogo (interface)
 │   │   │   ├── petIntro.js     tela "Como jogar?"
 │   │   │   └── petSound.js     sons sintetizados
+│   │   ├── sign/               ✋ SINALIZE E CONTE (seção 10)
+│   │   │   ├── signConfig.js   ★ configuração: vogal → carta → animal, pontuação, tempos, reconhecimento
+│   │   │   ├── signState.js    partida: rodadas, baralho, Tempo 1 e Tempo 2, pontos — sem DOM
+│   │   │   ├── signScore.js    pontos por rapidez e classificação final — sem DOM
+│   │   │   ├── signRecords.js  recordes salvos no aparelho — sem DOM
+│   │   │   ├── handSigns.js    reconhece A, E, I, O, U pelos 21 pontos da mão — sem DOM
+│   │   │   ├── signJudge.js    decide ao longo de vários quadros (certo / incorreto) — sem DOM
+│   │   │   ├── handTracker.js  MediaPipe Hand Landmarker (carregado sob demanda)
+│   │   │   ├── signAnimals.js  1, 2 ou 3 animais em 3D na frente da câmera
+│   │   │   ├── signGame.js     tela do jogo (carta → sinal → animais → contagem → resultado)
+│   │   │   └── signIntro.js    tela "✋ COMO JOGAR?"
 │   │   ├── ui/                 menu, Sala de Jogos, explicações, avisos/erros, sons, efeitos
-│   │   └── styles/             main.css (identidade visual), sala.css, pet.css
+│   │   └── styles/             main.css (identidade visual), sala.css, pet.css, sign.css
 │   ├── assets/                 arquivos GERADOS a partir dos originais
 │   │   ├── models/*.glb        animais convertidos (tools/convert_models.py)
 │   │   ├── targets/            paginas.mind, cartas.mind (+ .gz, .json)
 │   │   ├── img/                imagens otimizadas (WebP), ícones e cartas-mini/ (miniaturas)
 │   │   └── fonts/              Baloo 2 e Nunito (OFL)
-│   ├── vendor/                 MindAR 1.2.5 e Three.js r160 (cópias locais)
+│   ├── vendor/                 MindAR 1.2.5, Three.js r160 e MediaPipe Tasks Vision 1.0.1 (cópias locais)
 │   ├── cartas/ codes/ exemplo/ modelo3d/ pag/ videos/   ← arquivos originais
 ├── tools/                      conversores, compilador de alvos, servidor, visualizador
 ├── tests/                      testes unitários, de reconhecimento e ponta a ponta
@@ -134,7 +154,9 @@ do rastreamento (`AR`).
 
 O Bichinho Virtual tem a sua própria configuração, em
 **`inclusiapp/src/pet/petConfig.js`**: necessidades, ritmo do tempo, doenças, itens,
-ações e a **magia de cada carta** (seção 9).
+ações e a **magia de cada carta** (seção 9). O Sinalize e Conte também: em
+**`inclusiapp/src/sign/signConfig.js`** ficam a ligação **vogal → carta → animal**,
+a pontuação, os tempos e os ajustes do reconhecimento de mãos (seção 10).
 
 ## 5. Modelos 3D (Unity `.asset` → GLB)
 
@@ -243,7 +265,7 @@ Pontuação padrão (`config.js → GAME.scoring`): acerto **+100**; bônus de t
 MENU ─┬─ 📖 LIVRO EM AR
       └─ 🎮 SALA DE JOGOS (#/sala) ─┬─ 🃏 Jogo de Cartas    (#/jogo — o mesmo jogo, sem mudanças)
                                     ├─ 🐾 Bichinho Virtual  (#/bichinho → "Como jogar?" → #/bichinho/jogar)
-                                    └─ 🔒 Em breve          (só indicação visual, não abre nada)
+                                    └─ ✋ Sinalize e Conte  (#/sinalize → "Como jogar?" → #/sinalize/jogar — seção 10)
 ```
 
 ### 9.1 Como o Bichinho Virtual funciona
@@ -402,7 +424,105 @@ telas do jogo e seu visual, o Livro em AR (`ar/bookAR.js`, `modelManager.js`,
 `router.js` e `main.css`. O Bichinho usa instâncias próprias dos modelos 3D, então
 mudar a cor do bichinho sujo ou doente nunca afeta o livro.
 
-## 10. Publicar no GitHub Pages
+## 10. ✋ Sinalize e Conte (Jogo 3)
+
+```text
+SALA DE JOGOS → ✋ Sinalize e Conte (#/sinalize: "✋ COMO JOGAR?") → 🎮 INICIAR (#/sinalize/jogar)
+
+  🃏 carta sorteada → 📷 escanear a carta (MindAR) → ✋ fazer o sinal com a mão (MediaPipe)
+  → 🐾 aparecem 1, 2 ou 3 animais em 3D → 🔢 "Quantas abelhas apareceram?" 1 | 2 | 3 → ⭐ pontos
+  … 5 rodadas (as 5 vogais, sem repetir) → 🎉 PARTIDA CONCLUÍDA! + 🏆 recordes
+```
+
+### 10.1 Regras
+
+- **Cartas:** só as 5 vogais em LIBRAS (cartas 11 a 15). O baralho é o mesmo do
+  Jogo de Cartas (`game/deck.js`): as 5 vogais são embaralhadas e cada uma sai
+  **uma vez por partida**; "🔄 Jogar novamente" embaralha de novo.
+- **Escanear a carta só diz QUAL sinal fazer.** Os pontos do sinal só vêm quando o
+  MediaPipe vê a **mão** fazendo o sinal certo — o desenho da carta nunca vale (10.3).
+  Escanear a carta de outra vogal ou de um animal mostra "Essa é a carta E. Procure a
+  carta A!" (sem perder pontos).
+- **Sinal errado:** "❌ Sinal incorreto. Tente novamente." — sem perder pontos, mas o
+  Tempo 1 continua correndo.
+- **Contagem errada:** "Quase! Vamos contar novamente." — a rodada continua; os
+  animais dão um pulinho para ajudar a contar. **Certa:** "🎉 Muito bem!".
+- **Pular:** sem achar a carta por 8 s aparece "⏭️ Fazer o sinal sem a carta"; depois
+  de 15 s no sinal aparece "⏭️ Pular este sinal" (sem os pontos do sinal, mas ainda
+  dá para contar os animais). Assim ninguém fica preso.
+
+| Etapa | Pontos | Bônus de rapidez |
+|---|---|---|
+| ✋ **Sinal correto** — Tempo 1: de "✋ Faça o sinal" até o MediaPipe reconhecer | +100 | até 2 s **+50** · 2 a 4 s **+30** · 4 a 6 s **+15** · mais de 6 s **+5** |
+| 🔢 **Contagem correta** — Tempo 2: de quando os animais aparecem até a resposta certa | +50 | até 1 s **+30** · 1 a 2 s **+20** · 2 a 4 s **+10** · mais de 4 s **+0** |
+
+No fim: ⭐ pontuação, ⏱️ tempo total, ✋ sinais corretos (x/5), 🔢 contagens corretas
+de primeira (x/5), a maior sequência de acertos seguidos e a classificação —
+🥇 **Excelente!** (75% ou mais da pontuação máxima, 1150), 🥈 **Muito bem!** (50% ou
+mais) ou 🥉 **Continue praticando!**.
+
+### 10.2 Vogal → carta → animal
+
+| Vogal | Carta | Animal |
+|---|---|---|
+| A | `carta11.png` | 🐝 Abelha |
+| E | `carta12.png` | 🐘 Elefante |
+| I | `carta13.png` | 🦎 Iguana |
+| O | `carta14.png` | 🐆 Onça |
+| U | `carta15.png` | 🐻 Urso |
+
+Cada vogal é a inicial do seu animal, usando os 5 animais do livro. A associação
+fica em `SIGN_GAME.vowels` (`src/sign/signConfig.js`): para trocar o animal de uma
+vogal (por exemplo, O → Urso), mude `animal`, `plural` e `male` daquela vogal — a
+pergunta ("Quantas onças…", "Quantos ursos…"), o "Como jogar?" e os modelos 3D se
+ajustam sozinhos.
+
+### 10.3 Como o sinal é reconhecido
+
+1. O **MediaPipe Hand Landmarker** (`vendor/mediapipe`, roda no próprio aparelho com
+   WebAssembly e GPU) encontra os **21 pontos 3D** da mão na imagem da câmera, até
+   12 vezes por segundo (`handTracker.js`).
+2. `handSigns.js` mede a mão — o quanto cada dedo está esticado, os ângulos das
+   juntas, onde está a ponta do polegar em relação à palma e ao indicador —, medidas
+   que não dependem do tamanho da mão, da distância, do ângulo nem de ser a mão
+   direita ou esquerda, e dá uma nota de 0 a 1 para cada vogal:
+   - **A** mão fechada, polegar esticado para cima, ao lado do indicador;
+   - **E** dedos dobrados, polegar dobrado cruzando a palma, por baixo das pontas;
+   - **I** mão fechada, só o dedo mínimo esticado;
+   - **O** dedos curvos, a ponta do polegar encostando na ponta do indicador;
+   - **U** indicador e médio esticados e juntos, anelar e mínimo fechados.
+3. `signJudge.js` decide olhando vários quadros: o sinal certo precisa ficar parado
+   por ~0,7 s; o aviso de sinal incorreto só aparece se **outro** sinal continuar na
+   câmera por ~1,6 s (ou uma mão sem nenhuma vogal por ~3,2 s) — a mão passando de
+   um formato para outro não gera aviso falso.
+4. **A carta nunca vale como sinal:** depois de escanear, a avaliação só começa
+   quando a carta sai da frente da câmera ("🃏 Tire a carta da frente da câmera") — o
+   próprio MindAR confirma; e cada quadro é analisado do zero (modo `IMAGE` do
+   MediaPipe), sem "seguir" a região onde antes havia uma mão. Nos testes, os
+   desenhos das 5 cartas nunca foram vistos como mão.
+
+Na tela, a mão aparece desenhada sobre a imagem (pontos verdes quando o sinal está
+certo), uma barra enche enquanto o sinal é segurado e há dicas: "🔍 Aproxime a mão",
+"🖐️ Mostre a mão inteira", "👍 Isso! Segure o sinal…". Os limites de cada vogal
+foram calibrados com a mão 3D de teste e o MediaPipe; os ajustes (nota mínima,
+tempos) ficam em `SIGN_GAME.recognition`.
+
+### 10.4 Recordes
+
+Ficam só no aparelho (`localStorage`, chave `sinalizaacao:signRecords`): **maior
+pontuação**, **melhor tempo** (partida completa), **maior sequência de acertos**,
+partidas jogadas, sinais corretos e contagens corretas. Aparecem no "Como jogar?",
+no resultado ("🏆 SEUS RECORDES", com "NOVO!") e no cartão do jogo na Sala.
+
+### 10.5 O que foi criado e o que mudou
+
+| | Arquivos |
+|---|---|
+| **Novos** | `src/sign/*` (10 módulos), `src/styles/sign.css`, `vendor/mediapipe/` (biblioteca, WebAssembly, modelo e licença), testes `tests/unit/{handSigns,signJudge,signState,signRecords}.test.mjs`, `tests/make_hands.mjs`, `tests/e2e/hand-renderer.html` + `handRenderer.js`, `tests/fixtures/hands/` e `tests/fixtures/hand-model/` |
+| **Alterados (pouco)** | `index.html` — o cartão "🔒 Em breve" virou "✋ Sinalize e Conte" e entraram as 2 telas novas · `src/main.js` — rotas `#/sinalize` e `#/sinalize/jogar` · `src/ui/sala.js` — o cartão "Em breve" passou a ser opcional e o novo mostra o recorde · `src/styles/sala.css` — cor turquesa do cartão · `sw.js` — `VERSION = 'v3'` e cache de `.wasm`/`.task` · `tools/serve.mjs` — tipos `.wasm`/`.task` · `tests/e2e/run.mjs` — suíte `sinalize` e a Sala com 3 jogos |
+| **Intactos** | o Jogo de Cartas inteiro (`src/game/*`, `ui/instructions.js`), o Bichinho Virtual inteiro (`src/pet/*`, `pet.css`), o Livro em AR, `ar/arSession.js`, `ar/modelManager.js`, `config.js`, `router.js` e `main.css` — o Jogo 3 só **reaproveita** a sessão de AR (mesmos alvos e mesmo Controller do MindAR), a lista de cartas, o baralho, o cronômetro, o bônus de tempo, os modelos 3D, os sons e os avisos |
+
+## 11. Publicar no GitHub Pages
 
 1. No GitHub: **Settings → Pages → Build and deployment → Deploy from a branch**.
 2. Escolha a branch e a pasta **/ (root)** → **Save**.
@@ -411,14 +531,15 @@ mudar a cor do bichinho sujo ou doente nunca afeta o livro.
 Ao publicar mudanças grandes, aumente `VERSION` em `inclusiapp/sw.js` para
 renovar o cache dos visitantes.
 
-## 11. Testes
+## 12. Testes
 
 ```bash
-npm test                         # 65 testes de unidade: baralho, pontuação, regras, bichinho e cartas mágicas
+npm test                         # 101 testes de unidade: baralho, pontuação, regras, bichinho, cartas mágicas e Sinalize e Conte
 python3 tests/make_frames.py     # (opcional) regera as fotos sintéticas de teste
+node tests/make_hands.mjs        # (opcional) regera as fotos da mão 3D fazendo A, E, I, O, U
 node tests/e2e/recognition.mjs   # reconhecimento real de páginas e cartas
 npm run test:e2e                 # verificações ponta a ponta no Chromium (todas as telas)
-npm run test:e2e -- bichinho     # só uma parte: telas, livro, jogo, erros, paisagem, sala, bichinho
+npm run test:e2e -- sinalize     # só uma parte: telas, livro, jogo, erros, paisagem, sala, bichinho, sinalize
 ```
 
 Os testes ponta a ponta usam uma **câmera falsa** (`tests/e2e/fakeCamera.js`) que
@@ -442,7 +563,22 @@ Controller do MindAR). Os testes de unidade cobrem a passagem do tempo (inclusiv
 relógio voltando e ausência longa), doenças, sono, cocôs, salvamento, cópia de
 segurança, dados corrompidos e todas as 20 magias.
 
-## 12. Compatibilidade e desempenho
+No Sinalize e Conte, a câmera falsa mostra primeiro a foto da carta e depois a
+foto de uma **mão 3D articulada** fazendo o sinal (modelo "generic-hand" do WebXR
+Input Profiles, MIT — `tests/e2e/handRenderer.js`), e o **MediaPipe de verdade**
+analisa a imagem. São verificados: o "Como jogar?" com os 6 passos e as 5 vogais com
+seus animais, a câmera só depois de "Iniciar", carta de outra vogal ou de animal não
+valendo, **a carta escaneada sem pontos e o desenho dela nunca valendo como sinal**,
+sinal errado com "❌ Sinal incorreto", mão aberta não valendo, o sinal certo com +100 e
+bônus, os animais em 3D na quantidade sorteada, a pergunta e as respostas 1 | 2 | 3,
+"Quase! Vamos contar novamente.", "🎉 Muito bem!", as 5 vogais sem repetir, o
+resultado, os recordes salvos, "Jogar novamente", os botões de pular, a câmera
+desligada ao sair e o Jogo de Cartas funcionando depois (mesmo Controller do MindAR).
+Os testes de unidade cobrem o classificador (mão "ideal" girada em qualquer direção,
+mão esquerda, ruído, formatos que não são vogais e 72 resultados reais do MediaPipe),
+o juiz que decide ao longo dos quadros, as regras da partida, a pontuação e os recordes.
+
+## 13. Compatibilidade e desempenho
 
 - **Android** (Chrome) e **iPhone/iPad** (Safari, iOS 15+); desktop com webcam.
 - Sem dependência de CDN: bibliotecas e fontes ficam no próprio site.
@@ -454,10 +590,15 @@ segurança, dados corrompidos e todas as 20 magias.
   com o app em segundo plano; o quarto do bichinho desenha a ~30 quadros por segundo
   e para quando o app sai da tela. Sem WebGL, o bichinho aparece como figura (emoji)
   e o jogo continua funcionando.
+- Sinalize e Conte: o MediaPipe (≈ 8 MB de modelo + ≈ 11 MB de WebAssembly) só é
+  baixado quando a pessoa abre o jogo — e começa a baixar já no "Como jogar?" — e
+  depois fica no cache (funciona sem internet). Roda com a GPU e, se ela falhar, com
+  a CPU; analisa até 12 quadros por segundo, e o MindAR descansa enquanto a mão é
+  analisada. As imagens da câmera não saem do aparelho.
 - Acessibilidade: textos para leitores de tela, foco visível, alvos de toque
   grandes, "reduzir movimento" respeitado, retorno visual de todo som.
 
-## 13. Problemas comuns
+## 14. Problemas comuns
 
 | Sintoma | Solução |
 |---|---|
@@ -467,10 +608,13 @@ segurança, dados corrompidos e todas as 20 magias.
 | Carta nova não é reconhecida | rode `npm run targets` (ou `tools/compile-targets.html`) e publique os arquivos gerados |
 | Bichinhos "zerados" | os dados do navegador foram apagados (ou é uma janela anônima); no iPhone, use o app pela Tela de Início (seção 9.3) |
 | Carta mágica "recarregando" | cada carta funciona uma vez por minuto (`PET.magic.cardCooldownSeconds`) — use outra carta enquanto isso |
+| Sinal não é reconhecido | lugar bem iluminado, a **mão inteira** na tela, a palma virada para a câmera e o sinal parado por um instante; a carta precisa sair da frente da câmera. Se o aparelho não carregar o reconhecimento de mãos, use **⏭️ Pular este sinal** |
 
-## 14. Créditos e licenças
+## 15. Créditos e licenças
 
 - Ilustrações, cartas, vídeos e modelos: projeto **SinalizaAção: Animais em Voga** / InclusiVR.
 - [MindAR](https://github.com/hiukim/mind-ar-js) 1.2.5 — MIT.
 - [Three.js](https://threejs.org/) r160 — MIT.
+- [MediaPipe Tasks Vision](https://github.com/google-ai-edge/mediapipe) 1.0.1 e o modelo Hand Landmarker — Apache-2.0 (`inclusiapp/vendor/mediapipe/LICENSE`).
+- Só nos testes: mão 3D "generic-hand" do [WebXR Input Profiles](https://github.com/immersive-web/webxr-input-profiles) — MIT (`tests/fixtures/hand-model/LICENSE.md`).
 - Fontes [Baloo 2](https://fonts.google.com/specimen/Baloo+2) e [Nunito](https://fonts.google.com/specimen/Nunito) — SIL Open Font License.

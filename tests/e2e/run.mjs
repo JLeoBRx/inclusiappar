@@ -4,7 +4,7 @@
  *
  *   python3 tests/make_frames.py      # quadros sintéticos (uma vez)
  *   npm run test:e2e                   # todos
- *   npm run test:e2e -- livro          # só o livro   (ou: jogo, telas, erros, paisagem, sala, bichinho)
+ *   npm run test:e2e -- livro          # só o livro   (ou: jogo, telas, erros, paisagem, sala, bichinho, sinalize)
  *
  * Screenshots ficam em test-results/.
  */
@@ -107,6 +107,12 @@ async function testScreens() {
     await p.waitForSelector('[data-screen="pet-intro"].is-active');
     await p.waitForTimeout(500);
     await shot(p, `bichinho-como-jogar-${name}`);
+    await p.goto(`${BASE}#/sinalize`);
+    await p.waitForSelector('[data-screen="sign-intro"].is-active');
+    await p.waitForTimeout(500);
+    const signOverflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    check(`sinalize "Como jogar?" ${name}: sem rolagem horizontal`, signOverflow <= 0, `${signOverflow}px`);
+    await shot(p, `sinalize-como-jogar-${name}`);
     await p.context().close();
   }
   await page.context().close();
@@ -399,13 +405,17 @@ async function testSala() {
   await page.waitForSelector('[data-screen="sala"].is-active');
   await page.waitForTimeout(800);
   const tiles = await page.locator('.game-tile__title').allTextContents();
-  check('sala: 3 opções (Jogo de Cartas, Bichinho Virtual, Em breve)',
-    tiles.map((t) => t.trim()).join('|') === '🃏 Jogo de Cartas|🐾 Bichinho Virtual|🔒 Em breve', tiles.join(', '));
+  check('sala: 3 jogos (Jogo de Cartas, Bichinho Virtual, Sinalize e Conte)',
+    tiles.map((t) => t.trim()).join('|') === '🃏 Jogo de Cartas|🐾 Bichinho Virtual|✋ Sinalize e Conte', tiles.join(', '));
+  check('sala: cartão do Sinalize e Conte leva ao "Como jogar?"', await page.getAttribute('.game-tile--sign', 'href') === '#/sinalize' &&
+    (await page.textContent('[data-tile-meta="sign"]')).includes('Novidade'));
   await shot(page, 'sala');
-  await page.click('[data-action="soon"]', { force: true });
-  await page.waitForSelector('.toast');
-  check('sala: "Em breve" não abre nenhum jogo', (await page.textContent('.toast')).includes('Em breve') &&
-    await page.evaluate(() => location.hash) === '#/sala' && await page.getAttribute('[data-action="soon"]', 'aria-disabled') === 'true');
+  await page.click('a[href="#/sinalize"]');
+  await page.waitForSelector('[data-screen="sign-intro"].is-active');
+  check('sala → Sinalize e Conte ("✋ COMO JOGAR?")', (await page.textContent('#sign-intro-title')).includes('COMO JOGAR?'));
+  await page.click('[data-screen="sign-intro"] a.btn--ghost');
+  await page.waitForSelector('[data-screen="sala"].is-active');
+  check('Sinalize e Conte: "← VOLTAR" volta para a Sala', page.url().endsWith('#/sala'));
   await page.click('a[href="#/jogo"]');
   await page.waitForSelector('[data-screen="game-intro"].is-active');
   check('sala → Jogo de Cartas (explicação original)', (await page.textContent('#game-intro-title')).includes('Como jogar?'));
@@ -654,6 +664,206 @@ async function testPet() {
   await page.context().close();
 }
 
+/* ================================================================ sinalize e conte */
+const handImage = (sign) => `/tests/fixtures/hands/${sign}.jpg`;
+// quadros das cartas das vogais em LIBRAS (carta11.png → alvo 10 ... carta15.png → alvo 14)
+const VOWEL_FRAME = { A: 10, E: 11, I: 12, O: 13, U: 14 };
+const signState = (page) => page.evaluate(() => {
+  const g = window.__app.sign;
+  const m = g.match;
+  return { step: g.step, phase: m?.phase, round: m?.round && { ...m.round, vowel: undefined }, stats: m && { ...m.stats } };
+});
+
+/** Joga uma rodada inteira com a câmera falsa: carta → mão → contagem. */
+async function playSignRound(page, { wrongAnswer = false } = {}) {
+  await page.waitForFunction(() => window.__app.sign.step === 'scan', null, { timeout: 60000 });
+  const { round } = await signState(page);
+  await page.evaluate((u) => __fakeCam.show(u), frame('cartas', VOWEL_FRAME[round.letter]));
+  await page.waitForFunction(() => window.__app.sign.match.phase === 'sign', null, { timeout: 45000 });
+  await page.evaluate(() => __fakeCam.clear());
+  await page.waitForFunction(() => window.__app.sign.judge, null, { timeout: 90000 });
+  await page.evaluate((u) => __fakeCam.show(u), handImage(round.letter));
+  await page.waitForFunction(() => window.__app.sign.match.phase !== 'sign', null, { timeout: 45000 });
+  await page.evaluate(() => __fakeCam.clear());
+  await page.waitForFunction(() => window.__app.sign.match.phase === 'count', null, { timeout: 30000 });
+  if (wrongAnswer) await page.click(`[data-answer="${round.animals === 1 ? 2 : 1}"]`);
+  await page.click(`[data-answer="${round.animals}"]`);
+  await page.waitForFunction(() => window.__app.sign.match.phase !== 'count', null, { timeout: 10000 });
+  return round;
+}
+
+async function testSign() {
+  const page = await newPage();
+  await page.goto(`${BASE}#/sala`);
+  await page.waitForSelector('[data-screen="sala"].is-active');
+  await page.click('a[href="#/sinalize"]');
+  await page.waitForSelector('[data-screen="sign-intro"].is-active');
+  const steps = await page.locator('.sign-step h3').allTextContents();
+  check('sinalize: "Como jogar?" com os 6 passos', steps.join('|') ===
+    'Pegue a carta sorteada|Escaneie a carta|Faça o sinal|Acerte o sinal|Conte os animais|Responda', steps.join(', '));
+  check('sinalize: pontuação explicada', (await page.textContent('.callout--star')).includes('Quanto mais rápido e preciso') &&
+    (await page.textContent('[data-scoring]')).includes('+100'));
+  const vowels = (await page.locator('.sign-vowel').allTextContents()).map((t) => t.replace(/\s+/g, ' ').trim());
+  check('sinalize: só as 5 vogais em LIBRAS, cada uma com seu animal', vowels.length === 5 &&
+    ['A', 'E', 'I', 'O', 'U'].every((v, i) => vowels[i].startsWith(v)) && vowels.join(' ').includes('Abelha') && vowels.join(' ').includes('Urso'), vowels.join(' | '));
+  check('sinalize: sem recordes antes da primeira partida', await page.isVisible('[data-records-empty]'));
+  check('sinalize: câmera não abre antes de "Iniciar"', await page.evaluate(() => __fakeCam.calls) === 0);
+  await page.goto(`${BASE}#/sinalize/jogar`);
+  await page.waitForSelector('[data-screen="sign-intro"].is-active');
+  check('sinalize: link direto para o jogo leva ao "Como jogar?"', page.url().endsWith('#/sinalize'));
+  await shot(page, 'sinalize-como-jogar');
+
+  // ajusta os tempos de "pular" para o teste não esperar 8/15 s
+  await page.evaluate(async () => {
+    const { SIGN_GAME } = await import('/inclusiapp/src/sign/signConfig.js');
+    SIGN_GAME.timing.skipScanAfter = 1;
+    SIGN_GAME.timing.skipSignAfter = 1;
+  });
+  await page.evaluate(() => __fakeCam.clear());
+  await page.click('[data-action="start-sign"]');
+  try {
+    // ---------------------------------------------------- rodada 1, passo a passo
+    await page.waitForFunction(() => window.__app.sign.step === 'scan', null, { timeout: 90000 });
+    let st = await signState(page);
+    const r1 = st.round;
+    check('sinalize: rodada 1/5 com a carta sorteada no placar', (await page.textContent('.sg-round')).replace(/\s/g, '') === 'RODADA1/5' &&
+      (await page.textContent('[data-card-letter]')) === r1.letter && (await page.textContent('[data-scan-title]')).includes(`carta ${r1.letter}`));
+    await shot(page, 'sinalize-escanear');
+    const otherVowel = ['A', 'E', 'I', 'O', 'U'].find((v) => v !== r1.letter);
+    await page.evaluate((u) => __fakeCam.show(u), frame('cartas', VOWEL_FRAME[otherVowel]));
+    await page.waitForFunction((v) => document.querySelector('[data-scan-hint]').textContent.includes(`carta ${v}`), otherVowel, { timeout: 45000 });
+    await page.evaluate(() => __fakeCam.clear());
+    await page.waitForTimeout(500);
+    await page.evaluate((u) => __fakeCam.show(u), frame('cartas', 2)); // carta de animal (Urso)
+    await page.waitForFunction(() => document.querySelector('[data-scan-hint]').textContent.includes('não é uma vogal'), null, { timeout: 45000 });
+    st = await signState(page);
+    check('sinalize: carta de outra vogal ou de animal não vale (continua em "Escaneie")', st.phase === 'scan' && st.round.wrongCards >= 2, `erros: ${st.round.wrongCards}`);
+    await page.evaluate(() => __fakeCam.clear());
+    await page.waitForTimeout(500);
+    await page.evaluate((u) => __fakeCam.show(u), frame('cartas', VOWEL_FRAME[r1.letter]));
+    await page.waitForFunction(() => window.__app.sign.match.phase === 'sign', null, { timeout: 45000 });
+    // a carta continua na frente da câmera: o desenho dela não pode valer como sinal
+    await page.waitForTimeout(4000);
+    st = await signState(page);
+    check('sinalize: carta reconhecida → "Faça o sinal", mas a carta sozinha não dá pontos', st.phase === 'sign' && st.stats.score === 0 &&
+      (await page.textContent('[data-sign-title]')).includes(`sinal de ${r1.letter}`) &&
+      (await page.textContent('[data-sign-status]')).includes('Tire a carta'), await page.textContent('[data-sign-status]'));
+    await page.evaluate(() => __fakeCam.clear());
+    await page.waitForFunction(() => window.__app.sign.judge, null, { timeout: 90000 });
+    await page.waitForTimeout(600);
+    await shot(page, 'sinalize-faca-o-sinal');
+    // sinal errado
+    const wrongSign = ['A', 'E', 'I', 'O', 'U'].find((v) => v !== r1.letter);
+    await page.evaluate((u) => __fakeCam.show(u), handImage(wrongSign));
+    await page.waitForFunction(() => {
+      const f = document.querySelector('[data-flash]');
+      return !f.hidden && f.dataset.kind === 'wrong';
+    }, null, { timeout: 30000 });
+    st = await signState(page);
+    check('sinalize: sinal errado (MediaPipe) → "❌ Sinal incorreto", sem pontos, pode tentar de novo',
+      st.phase === 'sign' && st.stats.score === 0 && st.round.signAttempts >= 1 && (await page.textContent('[data-flash]')).includes('Sinal incorreto'));
+    await shot(page, 'sinalize-sinal-incorreto');
+    // mão aberta (não é vogal): nunca vale
+    await page.evaluate((u) => __fakeCam.show(u), handImage('open'));
+    await page.waitForTimeout(2500);
+    check('sinalize: mão aberta não vale como vogal', (await signState(page)).phase === 'sign');
+    // sinal certo: primeiro "segure o sinal" (a barra enche), depois aceito
+    await page.evaluate((u) => __fakeCam.show(u), handImage(r1.letter));
+    await page.waitForFunction(() => document.querySelector('[data-sign-status]').dataset.state === 'match' ||
+      window.__app.sign.match.phase !== 'sign', null, { timeout: 45000 });
+    if ((await signState(page)).phase === 'sign') {
+      check('sinalize: sinal certo na câmera → "👍 Isso! Segure o sinal..."', (await page.textContent('[data-sign-status]')).includes('Segure o sinal'));
+      await shot(page, 'sinalize-segurando-o-sinal');
+    }
+    await page.waitForFunction(() => window.__app.sign.match.phase !== 'sign', null, { timeout: 45000 });
+    st = await signState(page);
+    check('sinalize: sinal certo reconhecido pelo MediaPipe → +100 e bônus de rapidez', st.round.sign && !st.round.sign.skipped &&
+      st.round.sign.base === 100 && st.stats.score === st.round.sign.total && st.round.sign.total > 100, JSON.stringify(st.round.sign));
+    await shot(page, 'sinalize-sinal-correto');
+    await page.evaluate(() => __fakeCam.clear());
+    await page.waitForFunction(() => window.__app.sign.match.phase === 'count', null, { timeout: 30000 });
+    const parade = await page.evaluate(() => window.__app.sign.parade.count);
+    const question = await page.textContent('[data-question]');
+    check(`sinalize: aparecem ${r1.animals} animal(is) em 3D e a pergunta certa`, parade === r1.animals && /^Quant[oa]s .+ apareceram\?$/.test(question), `${parade} · ${question}`);
+    const answers = await page.locator('[data-answers] button').allTextContents();
+    check('sinalize: respostas 1 | 2 | 3', answers.map((t) => t.trim()[0]).join('') === '123', answers.join(','));
+    await page.waitForTimeout(500);
+    await shot(page, 'sinalize-contar');
+    await page.click(`[data-answer="${r1.animals === 1 ? 2 : 1}"]`);
+    await page.waitForFunction(() => !document.querySelector('[data-flash]').hidden, null, { timeout: 5000 });
+    st = await signState(page);
+    check('sinalize: contagem errada → "Quase! Vamos contar novamente." (a rodada continua)',
+      st.phase === 'count' && (await page.textContent('[data-flash]')).includes('Vamos contar novamente'));
+    const before = st.stats.score;
+    await page.click(`[data-answer="${r1.animals}"]`);
+    await page.waitForSelector('[data-screen="sign-game"] [data-feedback]:not([hidden])');
+    st = await signState(page);
+    const cheer = await page.textContent('[data-screen="sign-game"] [data-feedback]');
+    check('sinalize: contagem certa → "🎉 Muito bem!" e +50 com bônus', st.phase === 'done' && st.stats.score - before >= 50 &&
+      cheer.includes('MUITO BEM'), `${st.phase} · +${st.stats.score - before} · ${cheer.replace(/\s+/g, ' ').trim()}`);
+    await shot(page, 'sinalize-muito-bem');
+
+    // ---------------------------------------------------- rodadas 2 a 5
+    const letters = [r1.letter];
+    for (let i = 2; i <= 5; i++) letters.push((await playSignRound(page)).letter);
+    await page.waitForSelector('[data-screen="sign-game"] [data-summary]:not([hidden])', { timeout: 30000 });
+    check('sinalize: 5 rodadas, cada vogal uma vez (sem repetir)', [...letters].sort().join('') === 'AEIOU', letters.join(''));
+    const summary = await page.evaluate(() => {
+      const t = (k) => document.querySelector(`[data-screen="sign-game"] [data-sum="${k}"]`).textContent;
+      return { score: t('score'), time: t('time'), signs: t('signs'), counts: t('counts'), rank: document.querySelector('[data-sum-rank]').textContent, match: window.__app.sign.match.summary() };
+    });
+    check('sinalize: "🎉 PARTIDA CONCLUÍDA!" com pontos, tempo, sinais 5/5 e contagens 4/5', summary.signs === '5/5' && summary.counts === '4/5' &&
+      Number(summary.score) === summary.match.score && /\d+(min\d+)?s/.test(summary.time) &&
+      ['Excelente!', 'Muito bem!', 'Continue praticando!'].includes(summary.rank), JSON.stringify({ ...summary, match: undefined }));
+    const records = await page.evaluate(() => JSON.parse(localStorage.getItem('sinalizaacao:signRecords')));
+    check('sinalize: recordes salvos no aparelho (pontos, tempo, sequência, partidas)', records?.matches === 1 &&
+      records.bestScore === summary.match.score && records.bestTime > 0 && records.bestStreak >= 1 && records.signsCorrect === 5, JSON.stringify(records));
+    await page.waitForTimeout(800);
+    await shot(page, 'sinalize-resultado');
+
+    // ---------------------------------------------------- jogar novamente + pular etapas
+    await page.click('[data-action="replay"]');
+    await page.waitForFunction(() => window.__app.sign.step === 'scan', null, { timeout: 60000 });
+    st = await signState(page);
+    check('sinalize: "Jogar novamente" começa nova partida (rodada 1, 0 pontos)', st.stats.score === 0 && st.round.number === 1);
+    await page.waitForSelector('[data-action="skip-scan"]:not([hidden])', { timeout: 10000 });
+    await page.click('[data-action="skip-scan"]');
+    await page.waitForSelector('[data-action="skip-sign"]:not([hidden])', { timeout: 20000 });
+    await page.click('[data-action="skip-sign"]');
+    await page.waitForFunction(() => window.__app.sign.match.phase === 'count', null, { timeout: 30000 });
+    st = await signState(page);
+    check('sinalize: pular a carta e o sinal → sem pontos do sinal, mas dá para contar', st.round.scanSkipped && st.round.sign.skipped &&
+      st.stats.score === 0 && st.stats.signsSkipped === 1);
+  } catch (err) {
+    check('sinalize: partida completa', false, err.message.split('\n')[0]);
+    await shot(page, 'sinalize-falha');
+  }
+
+  // sair desliga a câmera; a Sala mostra o recorde
+  await page.click('[data-screen="sign-game"] .ar-topbar a[href="#/sala"]');
+  await page.waitForSelector('[data-screen="sala"].is-active');
+  await page.waitForTimeout(300);
+  check('sinalize: sair desliga a câmera', await page.evaluate(() => __fakeCam.liveTracks()) === 0);
+  check('sala: cartão do Sinalize e Conte mostra o recorde', (await page.textContent('[data-tile-meta="sign"]')).includes('Recorde'));
+
+  // o Jogo de Cartas (mesmo Controller do MindAR) continua funcionando depois
+  await page.click('a[href="#/jogo"]');
+  await page.waitForSelector('[data-screen="game-intro"].is-active');
+  await page.evaluate(() => __fakeCam.clear());
+  await page.click('[data-action="start-game"]');
+  try {
+    const target = await currentTarget(page);
+    await page.waitForSelector('[data-reveal]', { state: 'hidden', timeout: 10000 });
+    await page.evaluate((u) => __fakeCam.show(u), frame('cartas', target));
+    await page.waitForFunction(() => window.__app.game.engine.stats.hits === 1, null, { timeout: 45000 });
+    check('Jogo de Cartas funciona depois do Sinalize e Conte (acerto reconhecido)', true);
+  } catch (err) {
+    check('Jogo de Cartas funciona depois do Sinalize e Conte', false, err.message.split('\n')[0]);
+  }
+  check('sinalize sem erros de JavaScript', page.errors.length === 0, page.errors.slice(0, 3).join(' | '));
+  await page.context().close();
+}
+
 /* ================================================================ erros */
 async function testErrors() {
   const page = await newPage();
@@ -688,6 +898,7 @@ try {
   if (!only || only === 'paisagem') await testLandscape();
   if (!only || only === 'sala') await testSala();
   if (!only || only === 'bichinho') await testPet();
+  if (!only || only === 'sinalize') await testSign();
 } catch (err) {
   check('execução sem exceções', false, err.stack);
 } finally {
