@@ -1,29 +1,39 @@
 # SinalizaAção: Animais em Voga — WebApp de Realidade Aumentada
 
-WebApp de **Realidade Aumentada (AR)** com duas experiências, feito para celulares
-Android e iPhone (e funcional em tablets e computadores):
+WebApp de **Realidade Aumentada (AR)** feito para celulares Android e iPhone (e
+funcional em tablets e computadores):
 
 - **📖 Livro em AR** — aponte o celular para uma página do livro e o animal aparece
   em 3D sobre ela, acompanhado do **vídeo do sinal em LIBRAS** (com o fundo verde
   removido em tempo real). O botão **✋ Interagir** tira o animal da página para
   girar, aproximar e explorar com os dedos.
-- **🃏 Jogo de Cartas** — o jogo sorteia uma carta (como um baralho, sem repetir
-  no ciclo), a criança procura a carta física e a escaneia: acerto soma pontos e
-  bônus de tempo, erro desconta pontos, **⏭️ Pular** passa a vez.
+- **🎮 Sala de Jogos**, com:
+  - **🃏 Jogo de Cartas** — o jogo sorteia uma carta (como um baralho, sem repetir
+    no ciclo), a criança procura a carta física e a escaneia: acerto soma pontos e
+    bônus de tempo, erro desconta pontos, **⏭️ Pular** passa a vez.
+  - **🐾 Bichinho Virtual** — a criança cuida dos 5 animais do livro (fome, sede,
+    higiene, diversão, sono e saúde). As **cartas de LIBRAS são mágicas**: cada
+    carta reconhecida pela câmera faz uma ação no jogo (dar mel, dar banho, curar...).
+    Os bichinhos continuam vivendo com o app fechado e o progresso fica salvo no aparelho.
+  - **🔒 Em breve** — espaço reservado para o próximo jogo.
 
 Tudo roda no navegador, sem instalar nada: [MindAR](https://github.com/hiukim/mind-ar-js)
 (reconhecimento de imagens) + [Three.js](https://threejs.org/) (3D) + HTML/CSS/JS.
 
-| Menu | Livro em AR (animal 3D + LIBRAS) | Modo Interação | Jogo |
+| Menu | Livro em AR (animal 3D + LIBRAS) | Modo Interação | Jogo de Cartas |
 |---|---|---|---|
 | ![Menu](docs/screenshots/menu-celular.jpg) | ![Livro](docs/screenshots/livro-ar-elefante.jpg) | ![Interação](docs/screenshots/livro-interacao.jpg) | ![Jogo](docs/screenshots/jogo-acerto.jpg) |
+
+| Sala de Jogos | Bichinho: como jogar | Quarto do bichinho | Carta mágica em AR |
+|---|---|---|---|
+| ![Sala](docs/screenshots/sala.jpg) | ![Como jogar](docs/screenshots/bichinho-como-jogar.jpg) | ![Quarto](docs/screenshots/bichinho-quarto.jpg) | ![Magia](docs/screenshots/bichinho-magia.jpg) |
 
 ---
 
 ## 1. Como abrir
 
 **Publicado (recomendado):** a câmera só funciona em endereços `https://`. Com o
-GitHub Pages ativado (seção 9), o app fica em
+GitHub Pages ativado (seção 10), o app fica em
 `https://<usuário>.github.io/inclusiappar/` — a raiz redireciona para `inclusiapp/`.
 
 **No computador, para desenvolver:**
@@ -47,7 +57,7 @@ testar num celular, use o endereço publicado (HTTPS).
 │   ├── sw.js                   service worker (cache para visitas seguintes)
 │   ├── src/
 │   │   ├── main.js             inicialização, rotas, pré-carregamento
-│   │   ├── router.js           navegação (#/, #/livro, #/livro/ar, #/jogo, #/jogo/jogar)
+│   │   ├── router.js           navegação (#/, #/livro, #/sala, #/jogo, #/bichinho ...)
 │   │   ├── config.js           ★ CONFIGURAÇÃO CENTRAL
 │   │   ├── lib/three.js        ponto único de importação do Three.js
 │   │   ├── ar/
@@ -64,12 +74,22 @@ testar num celular, use o endereço publicado (HTTPS).
 │   │   │   ├── deck.js         baralho em ciclos (Fisher–Yates)
 │   │   │   ├── scoring.js      pontos, penalidade, bônus de tempo
 │   │   │   └── timer.js        cronômetro
-│   │   ├── ui/                 menu, explicações, avisos/erros, sons, efeitos
-│   │   └── styles/main.css     identidade visual, responsividade
+│   │   ├── pet/                🐾 BICHINHO VIRTUAL (seção 9)
+│   │   │   ├── petConfig.js    ★ configuração: necessidades, itens, ações e MAGIA DE CADA CARTA
+│   │   │   ├── petState.js     dados, passagem do tempo, doenças, salvamento — sem DOM
+│   │   │   ├── petActions.js   cuidados (comer, beber, banho...) — sem DOM
+│   │   │   ├── cardMagic.js    cartas mágicas: tipos de efeito e execução — sem DOM
+│   │   │   ├── petRoom.js      quarto 3D (modelos do livro, reações, cores)
+│   │   │   ├── petMagicAR.js   câmera das cartas mágicas (ARSession + efeitos sobre a carta)
+│   │   │   ├── petGame.js      tela do jogo (interface)
+│   │   │   ├── petIntro.js     tela "Como jogar?"
+│   │   │   └── petSound.js     sons sintetizados
+│   │   ├── ui/                 menu, Sala de Jogos, explicações, avisos/erros, sons, efeitos
+│   │   └── styles/             main.css (identidade visual), sala.css, pet.css
 │   ├── assets/                 arquivos GERADOS a partir dos originais
 │   │   ├── models/*.glb        animais convertidos (tools/convert_models.py)
 │   │   ├── targets/            paginas.mind, cartas.mind (+ .gz, .json)
-│   │   ├── img/                imagens otimizadas (WebP) e ícones
+│   │   ├── img/                imagens otimizadas (WebP), ícones e cartas-mini/ (miniaturas)
 │   │   └── fonts/              Baloo 2 e Nunito (OFL)
 │   ├── vendor/                 MindAR 1.2.5 e Three.js r160 (cópias locais)
 │   ├── cartas/ codes/ exemplo/ modelo3d/ pag/ videos/   ← arquivos originais
@@ -111,6 +131,10 @@ Toda a relação **Página → Alvo → Animal → Modelo → Vídeo** está em 
 No mesmo arquivo: links do menu (`APP.links`), parâmetros do chroma key
 (`LIBRAS`), nomes das cartas e todas as regras de pontuação (`GAME`), e os ajustes
 do rastreamento (`AR`).
+
+O Bichinho Virtual tem a sua própria configuração, em
+**`inclusiapp/src/pet/petConfig.js`**: necessidades, ritmo do tempo, doenças, itens,
+ações e a **magia de cada carta** (seção 9).
 
 ## 5. Modelos 3D (Unity `.asset` → GLB)
 
@@ -213,7 +237,172 @@ O `ARCombinationGameManager.cs` foi lido e sua lógica adaptada:
 Pontuação padrão (`config.js → GAME.scoring`): acerto **+100**; bônus de tempo
 **+100 até 5 s**, caindo até 0 em 40 s; erro **−20**; mínimo 0.
 
-## 9. Publicar no GitHub Pages
+## 9. Sala de Jogos e 🐾 Bichinho Virtual
+
+```text
+MENU ─┬─ 📖 LIVRO EM AR
+      └─ 🎮 SALA DE JOGOS (#/sala) ─┬─ 🃏 Jogo de Cartas    (#/jogo — o mesmo jogo, sem mudanças)
+                                    ├─ 🐾 Bichinho Virtual  (#/bichinho → "Como jogar?" → #/bichinho/jogar)
+                                    └─ 🔒 Em breve          (só indicação visual, não abre nada)
+```
+
+### 9.1 Como o Bichinho Virtual funciona
+
+- **5 bichinhos** — os mesmos animais do livro (Abelha, Elefante, Iguana, Onça e
+  Urso), com os mesmos modelos 3D, cada um com suas necessidades, nível e quarto.
+  A criança escolhe um e pode trocar a qualquer momento (os avisos ❗ 🤒 💤 na
+  barra de bichinhos mostram quem precisa de atenção).
+- **Necessidades** (0 a 100): 🍎 Fome · 💧 Sede · 🛁 Higiene · 🎾 Diversão ·
+  😴 Sono · ❤️ Saúde. Abaixo de 30 viram estados: *com fome*, *com sede*, *sujo*,
+  *entediado*, *com sono*, *doente/fraquinho* — que aparecem no quarto (balão de
+  pensamento, moscas, cor amarronzada, termômetro, luzes apagadas...).
+- **Cuidados** (botões): 🍎 Alimentar · 💧 Água · 🛁 Banho · 🎾 Brincar ·
+  💊 Remédio · 😴 Dormir / ☀️ Acordar · 🧹 Limpar. Tocar no bichinho faz
+  **❤️ carinho**; tocar no 💩 limpa. Comer, beber, banho e remédio usam itens da
+  **mochila** (o número em cada botão), que vêm das **cartas mágicas**; brincar,
+  dormir, limpar e carinho são livres.
+- **Doença**: a chance de adoecer cresce com sujeira, fome/sede, cocôs no quarto
+  e saúde baixa. O bichinho doente fica esverdeado, treme, mostra 🌡️ e perde
+  saúde até tomar **remédio** (🌿 folhinhas, ou as cartas da Iguana). Depois de
+  curado, fica protegido por 8 horas.
+- **O tempo passa com o app fechado**: cada bichinho guarda o horário da última
+  atualização; ao abrir o jogo, o tempo que passou é simulado em passos de 10 min
+  (fome, sede, sono, cocôs, doenças) — até 72 h, para ninguém voltar para um
+  desastre — e aparece o resumo **"Enquanto você estava fora..."**. Dormindo, o
+  bichinho recupera o sono e as outras necessidades caem mais devagar; com muito
+  sono, ele dorme sozinho, e acorda descansado.
+- **Recompensas**: ⭐ estrelas por cuidado e por magia, experiência e **nível** por
+  bichinho, **presente do dia** (itens do que os bichinhos mais precisam) e dias
+  seguidos. Na primeira vez há um **kit de boas-vindas** na mochila.
+
+Todos os números (quanto cada necessidade cai por hora, chance de doença,
+força dos itens, tempo de recarga das cartas...) ficam em
+**`inclusiapp/src/pet/petConfig.js`**, comentados.
+
+### 9.2 Cartas mágicas
+
+O botão **✨ CARTAS MÁGICAS** abre a câmera (só nesse momento). O bichinho aparece
+em 3D no canto da tela e, quando uma carta é reconhecida, surge um círculo mágico
+sobre ela, o item da magia sai da carta e voa até o bichinho. O reconhecimento usa
+**a mesma infraestrutura do Jogo de Cartas**: os mesmos alvos (`cartas.mind`), o
+mesmo Controller do MindAR e a mesma lista de cartas (`buildCardList`) — nada é
+baixado ou compilado duas vezes e o Jogo de Cartas não foi alterado.
+
+Magias padrão das 20 cartas (cada família tem um tema; as cartas em LIBRAS são
+as mais poderosas):
+
+| Cartas | Regra | Magias |
+|---|---|---|
+| 1–5 · animais | magia **na hora** no bichinho escolhido | 1 Abelha → 🍯 **Pote de mel** (Fome +35) · 2 Elefante → 💦 **Chuveirada de tromba** (Higiene +70 e Sede +25) · 3 Urso → 💤 **Soneca de urso** (Sono +40) · 4 Onça → 🏃 **Pega-pega** (Diversão +40) · 5 Iguana → 🌿 **Chá de folhas** (Saúde +30 e cura) |
+| 6–10 · sinais dos animais em LIBRAS | a mesma magia **para os 5 bichinhos** | 6 🍯 Banquete de mel · 7 💦 Chuveirada geral · 8 🌿 Chá para todos · 9 🎉 Festa da floresta · 10 💤 Soneca coletiva |
+| 11–15 · vogais em LIBRAS | **2 itens** para a mochila | A → 💧 Água · E → 🧽 Esponja · I → 🌿 Folhinhas · O → 🥚 Ovo · U → 🍇 Uva |
+| 16–20 · letras | **1 item** para a mochila | "A de Água", "E de Esponja", "I de Iguana", "O de Ovo", "U de Uva" |
+
+- A magia **nunca se perde**: se ninguém precisava (ex.: bichinho satisfeito ou
+  dormindo), o item vai para a mochila.
+- Cada carta **recarrega** por 60 s antes de funcionar de novo (outra carta não espera).
+- A primeira vez de cada carta dá ⭐ extras e a marca como descoberta no
+  **📖 Livro de Magias**, que lista todas as cartas, o que cada uma faz (texto
+  gerado da própria configuração) e quantas vezes foi usada.
+
+**Mudar o que uma carta faz** — edite `CARD_MAGIC` em `petConfig.js`. Cada carta
+(pelo número do arquivo `cartaN.png`) tem nome, emoji e uma **lista de efeitos**:
+
+```js
+// a carta da Abelha alimenta E dá banho:
+1: { name: 'Pote de mel', emoji: '🍯', effects: [
+  { type: 'care', action: 'alimentar', item: 'mel', target: 'current' },
+  { type: 'care', action: 'banho', target: 'current' },
+] },
+```
+
+| Tipo de efeito | O que faz |
+|---|---|
+| `{ type: 'care', action, target, power?, item? }` | cuidado (`alimentar`, `beber`, `banho`, `brincar`, `remedio`, `energia`) no bichinho escolhido (`'current'`) ou em todos (`'all'`) |
+| `{ type: 'item', item, amount }` | itens na mochila (`mel`, `ovo`, `uva`, `agua`, `esponja`, `folhas` — ou novos em `ITEMS`) |
+| `{ type: 'surprise', amount }` | o item de que o bichinho mais precisa |
+| `{ type: 'stars', amount }` | estrelas ⭐ |
+| `{ type: 'need', needs: { diversao: 10 }, target }` | muda necessidades diretamente |
+
+**Criar um novo tipo de efeito** (sem mexer no resto do jogo), em `cardMagic.js`:
+
+```js
+registerEffect('festa', {
+  apply(ctx, effect) {               // ctx: state, current, allPets, now...
+    for (const pet of ctx.allPets) pet.needs.diversao = 100;
+    return [{ kind: 'festa' }];       // resultados (para a tela explicar)
+  },
+  describe: () => 'Todos os bichinhos se divertem', // texto do Livro de Magias
+});
+```
+
+**Cartas novas** (`carta21.png`...): depois de `npm run targets`, elas já
+funcionam no Bichinho com a magia padrão (🎁 surpresa) e aparecem no Livro de
+Magias; para dar uma magia própria, basta criar a entrada `21: {...}` em
+`CARD_MAGIC`. As miniaturas do Livro de Magias são geradas com
+`python3 tools/card_thumbs.py` (sem miniatura, o app mostra a carta original).
+
+### 9.3 Salvamento local
+
+Todo o progresso fica **no próprio aparelho**, sem servidor e sem login
+(`localStorage`, como o resto do app — chave `sinalizaacao:pet`). Ele é salvo a cada
+cuidado ou magia, a cada 15 s, ao trocar de app/fechar a aba e ao sair do jogo; no
+início de cada sessão é feita uma **cópia de segurança** (`sinalizaacao:pet.backup`),
+usada se o principal estiver ilegível. O progresso só se perde se os dados do
+navegador/aplicativo forem apagados. O app também pede ao navegador armazenamento
+persistente (`navigator.storage.persist()`).
+
+```js
+{
+  schema: 1,                        // versão do formato (migrações em petState.js)
+  createdAt, lastSeen,              // horários (última vez que o jogo foi aberto)
+  selected: 'elefante',             // bichinho escolhido
+  pets: {
+    elefante: {
+      needs: { fome, sede, higiene, diversao, sono, saude },   // 0 a 100
+      sick, sickSince, immuneUntil, // doença
+      sleeping, sleepSince,         // sono
+      poops, digestion: [...],      // cocôs no quarto e "a caminho"
+      xp, level, bornAt, lastUpdate, lastCaress,
+      stats: { alimentar: 3, banho: 1, magias: 2, ... },
+    }, ...                          // abelha, iguana, onca, urso
+  },
+  inventory: { mel: 2, agua: 3, ... },          // mochila
+  stars: 12,
+  magic: { cooldowns: { 7: ... }, used: { 7: 2 } },   // Livro de Magias
+  daily: { lastDay: '2026-10-08', streak: 3 },
+  stats: { actions, magics, sessions },
+  settings: { tutorialSeen: true },
+}
+```
+
+Para mudar a estrutura no futuro, aumente `PET.schema` e escreva a migração em
+`MIGRATIONS` (`petState.js`); dados antigos, incompletos ou estranhos são
+corrigidos por `normalizeState()` sem perder o que pode ser aproveitado.
+
+> **iPhone/iPad:** o Safari pode apagar os dados de sites que ficam 7 dias sem ser
+> abertos. Para não perder os bichinhos, adicione o app à **Tela de Início**
+> (Compartilhar → Adicionar à Tela de Início) — assim ele guarda os dados próprios.
+
+### 9.4 O que mudou no projeto (atualização aditiva)
+
+| Arquivo existente | Mudança |
+|---|---|
+| `index.html` | o botão **🃏 JOGO DE CARTAS** do menu virou **🎮 SALA DE JOGOS**; telas novas (Sala, Como jogar?, jogo do bichinho); o "← VOLTAR" da explicação do Jogo de Cartas volta para a Sala |
+| `src/main.js` | rotas `#/sala`, `#/bichinho` e `#/bichinho/jogar` |
+| `src/ar/arSession.js` | `getRenderer` passou a ser exportado (o quarto 3D usa o mesmo contexto WebGL) |
+| `src/ui/sound.js` | `tone` passou a ser exportado (sons do bichinho) |
+| `sw.js` | `VERSION = 'v2'` (renova o cache dos visitantes) |
+| `tests/e2e/run.mjs` | o teste em paisagem chega ao jogo pelo caminho Menu → Sala → Jogo; novas verificações |
+
+**Intactos** (nenhuma linha alterada): o Jogo de Cartas inteiro (`game/cardGame.js`,
+`gameState.js`, `deck.js`, `scoring.js`, `timer.js`, `ui/instructions.js`), as
+telas do jogo e seu visual, o Livro em AR (`ar/bookAR.js`, `modelManager.js`,
+`animalMaterial.js`, `videoChroma.js`, `gestures.js`, `targets.js`), `config.js`,
+`router.js` e `main.css`. O Bichinho usa instâncias próprias dos modelos 3D, então
+mudar a cor do bichinho sujo ou doente nunca afeta o livro.
+
+## 10. Publicar no GitHub Pages
 
 1. No GitHub: **Settings → Pages → Build and deployment → Deploy from a branch**.
 2. Escolha a branch e a pasta **/ (root)** → **Save**.
@@ -222,13 +411,14 @@ Pontuação padrão (`config.js → GAME.scoring`): acerto **+100**; bônus de t
 Ao publicar mudanças grandes, aumente `VERSION` em `inclusiapp/sw.js` para
 renovar o cache dos visitantes.
 
-## 10. Testes
+## 11. Testes
 
 ```bash
-npm test                         # 24 testes de unidade: baralho, pontuação, regras
+npm test                         # 65 testes de unidade: baralho, pontuação, regras, bichinho e cartas mágicas
 python3 tests/make_frames.py     # (opcional) regera as fotos sintéticas de teste
 node tests/e2e/recognition.mjs   # reconhecimento real de páginas e cartas
-npm run test:e2e                 # 54 verificações ponta a ponta no Chromium
+npm run test:e2e                 # verificações ponta a ponta no Chromium (todas as telas)
+npm run test:e2e -- bichinho     # só uma parte: telas, livro, jogo, erros, paisagem, sala, bichinho
 ```
 
 Os testes ponta a ponta usam uma **câmera falsa** (`tests/e2e/fakeCamera.js`) que
@@ -240,19 +430,34 @@ inexistente, acerto, erro, penalidade, Pular, 20 cartas sem repetição, ciclo
 completo, novo baralho, e as telas em celular, paisagem, tablet e desktop
 (capturas em `test-results/`).
 
-## 11. Compatibilidade e desempenho
+Na Sala de Jogos e no Bichinho Virtual: o caminho Menu → Sala → Jogo de Cartas, o
+"Em breve" sem jogo, o "Como jogar?" com os 5 passos, escolher e trocar de bichinho,
+comer (gastando da mochila), recusar quando satisfeito, a dica de cartas quando
+acaba um item, cocô e limpeza, carinho, doença e cura, dormir e acordar, as cartas
+mágicas pela câmera (Abelha alimenta o escolhido, Elefante em LIBRAS cuida dos 5,
+vogal em LIBRAS dá 2 itens, recarga da carta), câmera desligada ao fechar, Livro de
+Magias, progresso salvo ao recarregar, 10 horas fora com o resumo "Enquanto você
+estava fora..." e o Jogo de Cartas funcionando depois das cartas mágicas (mesmo
+Controller do MindAR). Os testes de unidade cobrem a passagem do tempo (inclusive
+relógio voltando e ausência longa), doenças, sono, cocôs, salvamento, cópia de
+segurança, dados corrompidos e todas as 20 magias.
+
+## 12. Compatibilidade e desempenho
 
 - **Android** (Chrome) e **iPhone/iPad** (Safari, iOS 15+); desktop com webcam.
 - Sem dependência de CDN: bibliotecas e fontes ficam no próprio site.
 - Carregamento sob demanda: a biblioteca de AR é preparada enquanto a pessoa lê
   as instruções; cada modelo 3D (75–390 KB) só é baixado quando a página aparece;
   os alvos vêm comprimidos (páginas 1,5 MB, cartas 2,5 MB).
-- Um único contexto WebGL reaproveitado; resolução limitada a 2× em telas densas;
-  o rastreamento pausa no Modo Interação e com o app em segundo plano.
+- Um único contexto WebGL reaproveitado (inclusive pelo quarto do bichinho);
+  resolução limitada a 2× em telas densas; o rastreamento pausa no Modo Interação e
+  com o app em segundo plano; o quarto do bichinho desenha a ~30 quadros por segundo
+  e para quando o app sai da tela. Sem WebGL, o bichinho aparece como figura (emoji)
+  e o jogo continua funcionando.
 - Acessibilidade: textos para leitores de tela, foco visível, alvos de toque
   grandes, "reduzir movimento" respeitado, retorno visual de todo som.
 
-## 12. Problemas comuns
+## 13. Problemas comuns
 
 | Sintoma | Solução |
 |---|---|
@@ -260,8 +465,10 @@ completo, novo baralho, e as telas em celular, paisagem, tablet e desktop
 | Câmera não abre | use `https://`; feche apps que usam a câmera; abra no Chrome/Safari (não dentro do Instagram/WhatsApp) |
 | Página não reconhecida | ~30 cm de distância, página inteira no quadro, boa iluminação, sem reflexo |
 | Carta nova não é reconhecida | rode `npm run targets` (ou `tools/compile-targets.html`) e publique os arquivos gerados |
+| Bichinhos "zerados" | os dados do navegador foram apagados (ou é uma janela anônima); no iPhone, use o app pela Tela de Início (seção 9.3) |
+| Carta mágica "recarregando" | cada carta funciona uma vez por minuto (`PET.magic.cardCooldownSeconds`) — use outra carta enquanto isso |
 
-## 13. Créditos e licenças
+## 14. Créditos e licenças
 
 - Ilustrações, cartas, vídeos e modelos: projeto **SinalizaAção: Animais em Voga** / InclusiVR.
 - [MindAR](https://github.com/hiukim/mind-ar-js) 1.2.5 — MIT.

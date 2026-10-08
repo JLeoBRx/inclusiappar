@@ -4,7 +4,7 @@
  *
  *   python3 tests/make_frames.py      # quadros sintéticos (uma vez)
  *   npm run test:e2e                   # todos
- *   npm run test:e2e -- livro          # só o livro   (ou: jogo, telas, erros, paisagem)
+ *   npm run test:e2e -- livro          # só o livro   (ou: jogo, telas, erros, paisagem, sala, bichinho)
  *
  * Screenshots ficam em test-results/.
  */
@@ -55,6 +55,9 @@ async function testScreens() {
   await page.waitForSelector('[data-screen="menu"].is-active');
   await page.waitForTimeout(700);
   check('menu: 4 botões visíveis', await page.locator('.menu-btn, .link-btn').count() === 4);
+  const menuTitles = await page.locator('.menu-btn__title').allTextContents();
+  check('menu: "Sala de Jogos" no lugar do "Jogo de Cartas"', menuTitles.join('|') === 'LIVRO EM AR|SALA DE JOGOS' &&
+    await page.getAttribute('.menu-btn--game', 'href') === '#/sala', menuTitles.join(', '));
   const store = await page.getAttribute('[data-link="store"]', 'href');
   const site = await page.getAttribute('[data-link="site"]', 'href');
   check('menu: loja em nova aba', store === 'https://loja.inclusivr.com.br/' &&
@@ -94,6 +97,16 @@ async function testScreens() {
     await p.waitForSelector('[data-screen="game-intro"].is-active');
     await p.waitForTimeout(500);
     await shot(p, `jogo-explicacao-${name}`);
+    await p.goto(`${BASE}#/sala`);
+    await p.waitForSelector('[data-screen="sala"].is-active');
+    await p.waitForTimeout(800);
+    const salaOverflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    check(`sala ${name}: sem rolagem horizontal`, salaOverflow <= 0, `${salaOverflow}px`);
+    await shot(p, `sala-${name}`);
+    await p.goto(`${BASE}#/bichinho`);
+    await p.waitForSelector('[data-screen="pet-intro"].is-active');
+    await p.waitForTimeout(500);
+    await shot(p, `bichinho-como-jogar-${name}`);
     await p.context().close();
   }
   await page.context().close();
@@ -360,6 +373,9 @@ async function testLandscape() {
   }
   await page.click('section[data-screen="book-ar"] .ar-topbar a');
   await page.waitForSelector('[data-screen="menu"].is-active');
+  // Menu → Sala de Jogos → Jogo de Cartas
+  await page.click('a[href="#/sala"]');
+  await page.waitForSelector('[data-screen="sala"].is-active');
   await page.click('a[href="#/jogo"]');
   await page.evaluate(() => __fakeCam.clear());
   await page.click('[data-action="start-game"]');
@@ -371,6 +387,270 @@ async function testLandscape() {
     return r.bottom <= innerHeight && r.right <= innerWidth;
   });
   check('paisagem: placar do jogo cabe na tela', hud);
+  await page.context().close();
+}
+
+/* ================================================================ sala de jogos */
+async function testSala() {
+  const page = await newPage();
+  await page.goto(`${BASE}#/`);
+  await page.waitForSelector('[data-screen="menu"].is-active');
+  await page.click('a[href="#/sala"]');
+  await page.waitForSelector('[data-screen="sala"].is-active');
+  await page.waitForTimeout(800);
+  const tiles = await page.locator('.game-tile__title').allTextContents();
+  check('sala: 3 opções (Jogo de Cartas, Bichinho Virtual, Em breve)',
+    tiles.map((t) => t.trim()).join('|') === '🃏 Jogo de Cartas|🐾 Bichinho Virtual|🔒 Em breve', tiles.join(', '));
+  await shot(page, 'sala');
+  await page.click('[data-action="soon"]', { force: true });
+  await page.waitForSelector('.toast');
+  check('sala: "Em breve" não abre nenhum jogo', (await page.textContent('.toast')).includes('Em breve') &&
+    await page.evaluate(() => location.hash) === '#/sala' && await page.getAttribute('[data-action="soon"]', 'aria-disabled') === 'true');
+  await page.click('a[href="#/jogo"]');
+  await page.waitForSelector('[data-screen="game-intro"].is-active');
+  check('sala → Jogo de Cartas (explicação original)', (await page.textContent('#game-intro-title')).includes('Como jogar?'));
+  await page.click('[data-screen="game-intro"] a.btn--ghost');
+  await page.waitForSelector('[data-screen="sala"].is-active');
+  check('Jogo de Cartas: "← VOLTAR" volta para a Sala', page.url().endsWith('#/sala'));
+  await page.click('.sala__actions a');
+  await page.waitForSelector('[data-screen="menu"].is-active');
+  check('sala: "← VOLTAR" volta para o menu', page.url().endsWith('#/'));
+  check('sala sem erros de JavaScript', page.errors.length === 0, page.errors.slice(0, 3).join(' | '));
+  await page.context().close();
+}
+
+/* ================================================================ bichinho virtual */
+const petState = (page) => page.evaluate(() => JSON.parse(JSON.stringify(window.__app.pet.state)));
+const setPet = (page, fn, arg) => page.evaluate(([code, a]) => {
+  const g = window.__app.pet;
+  // eslint-disable-next-line no-new-func
+  new Function('g', 'state', 'pet', 'arg', code)(g, g.state, g.pet, a);
+  g._render();
+}, [fn, arg]);
+
+async function showCard(page, index, variant = 'frente') {
+  await page.evaluate(() => __fakeCam.clear());
+  await page.waitForTimeout(400);
+  await page.evaluate((u) => __fakeCam.show(u), frame('cartas', index, variant));
+}
+
+async function testPet() {
+  const page = await newPage();
+  const origin = new URL(BASE).origin;
+
+  // primeira vez: abrir o jogo direto leva ao "Como jogar?"
+  await page.goto(`${BASE}#/bichinho/jogar`);
+  await page.waitForSelector('[data-screen="pet-intro"].is-active');
+  check('bichinho: primeira vez mostra o "Como jogar?"', page.url().endsWith('#/bichinho'));
+  const steps = (await page.locator('.pet-step h3').allTextContents()).map((t) => t.trim());
+  check('como jogar: os 5 passos', steps.join('|') === '1. Escolha um bichinho|2. Observe suas necessidades|3. Use as cartas mágicas|4. Cuide do seu bichinho|5. Continue cuidando', steps.join(' | '));
+  const chips = (await page.locator('.pet-chips li').allTextContents()).map((t) => t.trim());
+  check('como jogar: estados (fome, sede, sujo, entediado, sono, doente)', chips.join('|') === '🍎 Com fome|💧 Com sede|🛁 Sujo|🎾 Entediado|😴 Com sono|❤️ Doente', chips.join(', '));
+  await shot(page, 'bichinho-como-jogar');
+  check('como jogar: a câmera não abre', await page.evaluate(() => __fakeCam.calls) === 0);
+
+  await page.click('[data-action="start-pet"]');
+  await page.waitForSelector('[data-modal="choose"]:not([hidden])');
+  check('bichinho: escolha entre os 5 animais', await page.locator('[data-choose]').count() === 5);
+  await shot(page, 'bichinho-escolha');
+  await page.click('[data-choose="elefante"]');
+  await page.waitForFunction(() => window.__app.pet.actor && window.__app.pet.room.rect, null, { timeout: 30000 });
+  let st = await petState(page);
+  check('bichinho: elefante escolhido, com o modelo 3D no quarto', st.selected === 'elefante' &&
+    await page.evaluate(() => window.__app.pet.room.running && window.__app.pet.actor.pet.id === 'elefante'));
+  check('bichinho: 6 necessidades e 7 cuidados', await page.locator('[data-needs] .need').count() === 6 &&
+    await page.locator('[data-actions] .care-btn').count() === 7);
+  check('bichinho: câmera só abre nas cartas mágicas', await page.evaluate(() => __fakeCam.calls) === 0);
+  await page.waitForTimeout(4500);
+  await shot(page, 'bichinho-quarto');
+
+  // alimentar pelo botão (usa a comida da mochila)
+  await setPet(page, 'pet.needs.fome = 20;');
+  const mel = st.inventory.mel;
+  await page.click('[data-care="alimentar"]');
+  st = await petState(page);
+  check('alimentar: usa o mel da mochila e mata a fome', st.pets.elefante.needs.fome >= 54 && st.inventory.mel === mel - 1,
+    `fome ${Math.round(st.pets.elefante.needs.fome)}, mel ${st.inventory.mel}`);
+  await page.waitForTimeout(900);
+  await shot(page, 'bichinho-comendo');
+  await setPet(page, 'pet.needs.fome = 100;');
+  const inv = JSON.stringify((await petState(page)).inventory);
+  await page.click('[data-care="alimentar"]');
+  await page.waitForSelector('[data-speech]:not([hidden])');
+  check('alimentar satisfeito: recusa sem gastar item', JSON.stringify((await petState(page)).inventory) === inv &&
+    (await page.textContent('[data-speech]')).includes('fome'));
+
+  // sem item: dica de quais cartas trazem mais
+  await setPet(page, 'state.inventory.agua = 0; pet.needs.sede = 10;');
+  await page.click('[data-care="beber"]');
+  await page.waitForSelector('[data-modal="hint"]:not([hidden])');
+  const hint = await page.textContent('[data-modal="hint"]');
+  check('sem água: indica as cartas mágicas (A, A em LIBRAS, Elefante)', hint.includes('Acabou a água') && hint.includes('Letra A') && hint.includes('Elefante'));
+  await shot(page, 'bichinho-dica-cartas');
+  await page.click('[data-modal="hint"] [data-close]');
+
+  // sujeira: tocar no cocô e no botão Limpar
+  await setPet(page, 'pet.poops = 2; pet.needs.higiene = 20;');
+  check('cocôs aparecem no quarto', await page.locator('[data-poop]').count() === 2);
+  await page.locator('[data-poop]').first().click();
+  check('tocar no cocô limpa', (await petState(page)).pets.elefante.poops === 1);
+  await page.click('[data-care="limpar"]');
+  check('botão Limpar limpa o quarto', (await petState(page)).pets.elefante.poops === 0);
+
+  // carinho
+  await setPet(page, 'pet.needs.diversao = 50; pet.lastCaress = 0;');
+  await page.click('[data-action="caress"]');
+  check('carinho (tocar no bichinho) diverte', (await petState(page)).pets.elefante.needs.diversao > 50);
+
+  // doença e remédio
+  await setPet(page, 'pet.sick = true; pet.needs.saude = 30; state.inventory.folhas = 1;');
+  await page.waitForTimeout(1500);
+  check('doente: aparece no quarto e nos alertas', await page.evaluate(() => document.querySelector('[data-room]').hasAttribute('data-sick')) &&
+    (await page.textContent('[data-mood]')).includes('Doente'));
+  await shot(page, 'bichinho-doente');
+  await page.click('[data-care="remedio"]');
+  st = await petState(page);
+  check('remédio cura e recupera a saúde', !st.pets.elefante.sick && st.pets.elefante.needs.saude >= 59, `saúde ${Math.round(st.pets.elefante.needs.saude)}`);
+
+  // dormir e acordar
+  await setPet(page, 'pet.needs.sono = 30;');
+  await page.click('[data-care="dormir"]');
+  check('dormir: luzes apagadas', (await petState(page)).pets.elefante.sleeping &&
+    await page.evaluate(() => document.querySelector('[data-room]').hasAttribute('data-night')));
+  await page.waitForTimeout(1500);
+  await shot(page, 'bichinho-dormindo');
+  check('dormindo: não come', await page.evaluate(() => {
+    window.__app.pet.state.pets.elefante.needs.fome = 10;
+    return document.querySelector('[data-care="alimentar"]').click() || window.__app.pet.state.pets.elefante.needs.fome === 10;
+  }));
+  await page.click('[data-care="acordar"]');
+  check('acordar', !(await petState(page)).pets.elefante.sleeping);
+
+  // trocar de bichinho
+  await page.click('[data-pet="abelha"]');
+  await page.waitForFunction(() => window.__app.pet.actor?.pet.id === 'abelha', null, { timeout: 30000 });
+  check('trocar para a abelha', (await petState(page)).selected === 'abelha');
+  await page.waitForTimeout(1200);
+  await shot(page, 'bichinho-abelha');
+
+  // ---------------------------------------------------- cartas mágicas (câmera)
+  await setPet(page, `for (const p of Object.values(state.pets)) { p.needs.fome = 20; p.needs.higiene = 15; p.needs.sede = 20; p.sleeping = false; }
+    state.inventory.agua = 0;`);
+  await page.evaluate((u) => __fakeCam.show(u), frame('cartas', 0));
+  await page.click('.pet-panel [data-action="magic"]');
+  await page.waitForFunction(() => window.__app.pet.scanner.running, null, { timeout: 90000 });
+  check('cartas mágicas: câmera aberta', await page.evaluate(() => __fakeCam.liveTracks()) > 0);
+  try {
+    await page.waitForFunction(() => window.__app.pet.state.magic.used[1] === 1, null, { timeout: 45000 });
+    st = await petState(page);
+    check('carta 1 (Abelha) → o bichinho escolhido come mel', st.pets.abelha.needs.fome >= 54 && st.pets.urso.needs.fome < 25,
+      `abelha ${Math.round(st.pets.abelha.needs.fome)}, urso ${Math.round(st.pets.urso.needs.fome)}`);
+    await page.waitForSelector('[data-spell]:not([hidden])');
+    check('magia explicada na tela', (await page.textContent('[data-spell]')).includes('Pote de mel'));
+    await page.waitForTimeout(700);
+    await shot(page, 'bichinho-magia-abelha');
+  } catch (err) {
+    check('carta 1 (Abelha) → magia', false, err.message.split('\n')[0]);
+  }
+
+  await showCard(page, 6, 'inclinada');
+  try {
+    await page.waitForFunction(() => window.__app.pet.state.magic.used[7] === 1, null, { timeout: 45000 });
+    st = await petState(page);
+    const clean = Object.values(st.pets).filter((p) => p.needs.higiene >= 80).length;
+    check('carta 7 (Elefante em LIBRAS) → banho e água para os 5', clean === 5 && Object.values(st.pets).every((p) => p.needs.sede >= 44), `${clean}/5 limpos`);
+    await page.waitForTimeout(900);
+    await shot(page, 'bichinho-magia-libras');
+  } catch (err) {
+    check('carta 7 (Elefante em LIBRAS) → magia', false, err.message.split('\n')[0]);
+  }
+
+  await page.waitForTimeout(2600);
+  await showCard(page, 10);
+  try {
+    await page.waitForFunction(() => window.__app.pet.state.magic.used[11] === 1, null, { timeout: 45000 });
+    check('carta 11 (A em LIBRAS) → 2 águas na mochila', (await petState(page)).inventory.agua === 2);
+  } catch (err) {
+    check('carta 11 (A em LIBRAS)', false, err.message.split('\n')[0]);
+  }
+
+  await page.waitForTimeout(2600);
+  const fomeAntes = (await petState(page)).pets.abelha.needs.fome;
+  await showCard(page, 0, 'inclinada');
+  try {
+    await page.waitForFunction(() => document.querySelector('[data-spell]')?.textContent.includes('Recarregando'), null, { timeout: 45000 });
+    check('a mesma carta recarrega antes de funcionar de novo', (await petState(page)).magic.used[1] === 1 &&
+      Math.abs((await petState(page)).pets.abelha.needs.fome - fomeAntes) < 1);
+  } catch (err) {
+    check('recarga da carta', false, err.message.split('\n')[0]);
+  }
+
+  await page.click('[data-action="close-magic"]');
+  await page.waitForFunction(() => !window.__app.pet.magicOpen && window.__app.pet.room.running, null, { timeout: 15000 });
+  await page.waitForFunction(() => __fakeCam.liveTracks() === 0, null, { timeout: 8000 }).catch(() => {});
+  check('fechar as cartas mágicas desliga a câmera e volta ao quarto', await page.evaluate(() => __fakeCam.liveTracks()) === 0 &&
+    await page.evaluate(() => !!document.querySelector('[data-room-stage] canvas')));
+
+  // Livro de Magias
+  await page.click('.pet-topbar [data-action="book"]');
+  await page.waitForSelector('[data-modal="book"]:not([hidden])');
+  check('Livro de Magias: 20 cartas, 3 descobertas', await page.locator('.book-card').count() === 20 &&
+    (await page.textContent('[data-book-count]')).includes('3 de 20'), await page.textContent('[data-book-count]'));
+  await page.waitForTimeout(600);
+  await shot(page, 'bichinho-livro-de-magias');
+  await page.click('[data-modal="book"] [data-close]');
+
+  // ---------------------------------------------------- salvamento local
+  const saved = await petState(page);
+  await page.reload();
+  await page.waitForSelector('[data-screen="pet-game"].is-active');
+  await page.waitForFunction(() => window.__app.pet.state && window.__app.pet.actor, null, { timeout: 30000 });
+  st = await petState(page);
+  check('progresso salvo ao recarregar (bichinho, mochila, estrelas, cartas)', st.selected === saved.selected &&
+    st.inventory.agua === saved.inventory.agua && st.stars === saved.stars && st.magic.used[7] === 1 &&
+    Math.abs(st.pets.urso.needs.higiene - saved.pets.urso.needs.higiene) < 1);
+
+  // o tempo passa com o jogo fechado (10 horas)
+  await page.goto(`${origin}/inclusiapp/manifest.webmanifest`);
+  const before = await page.evaluate(() => {
+    const key = 'sinalizaacao:pet';
+    const data = JSON.parse(localStorage.getItem(key));
+    const h = 10 * 3600e3;
+    data.lastSeen -= h;
+    for (const p of Object.values(data.pets)) p.lastUpdate -= h;
+    localStorage.setItem(key, JSON.stringify(data));
+    return data.pets.abelha.needs;
+  });
+  await page.goto(`${BASE}#/bichinho/jogar`);
+  await page.waitForSelector('[data-screen="pet-game"].is-active');
+  await page.waitForSelector('[data-modal="away"]:not([hidden])', { timeout: 15000 });
+  st = await petState(page);
+  check('10 h fora: a fome e a sede caíram com o tempo', before.fome - st.pets.abelha.needs.fome > 25 && before.sede - st.pets.abelha.needs.sede > 25,
+    `fome ${Math.round(before.fome)} → ${Math.round(st.pets.abelha.needs.fome)}`);
+  check('10 h fora: "Enquanto você estava fora..."', (await page.textContent('[data-away-time]')).includes('10 horas'), await page.textContent('[data-away-time]'));
+  await shot(page, 'bichinho-enquanto-fora');
+  await page.click('[data-modal="away"] [data-close]');
+
+  // Sala mostra o resumo do bichinho
+  await page.click('.pet-topbar a[href="#/sala"]');
+  await page.waitForSelector('[data-screen="sala"].is-active');
+  check('sala: resumo do Bichinho Virtual', (await page.textContent('[data-tile-meta="pet"]')).includes('precisa'), await page.textContent('[data-tile-meta="pet"]'));
+
+  // o Jogo de Cartas continua funcionando depois das cartas mágicas (mesmo Controller do MindAR)
+  await page.click('a[href="#/jogo"]');
+  await page.waitForSelector('[data-screen="game-intro"].is-active');
+  await page.evaluate(() => __fakeCam.clear());
+  await page.click('[data-action="start-game"]');
+  try {
+    const target = await currentTarget(page);
+    await page.waitForSelector('[data-reveal]', { state: 'hidden', timeout: 10000 });
+    await page.evaluate((u) => __fakeCam.show(u), frame('cartas', target));
+    await page.waitForFunction(() => window.__app.game.engine.stats.hits === 1, null, { timeout: 45000 });
+    check('Jogo de Cartas funciona depois do Bichinho (acerto reconhecido)', true);
+  } catch (err) {
+    check('Jogo de Cartas funciona depois do Bichinho', false, err.message.split('\n')[0]);
+  }
+  check('bichinho sem erros de JavaScript', page.errors.length === 0, page.errors.slice(0, 3).join(' | '));
   await page.context().close();
 }
 
@@ -406,6 +686,8 @@ try {
   if (!only || only === 'jogo') await testGame();
   if (!only || only === 'erros') await testErrors();
   if (!only || only === 'paisagem') await testLandscape();
+  if (!only || only === 'sala') await testSala();
+  if (!only || only === 'bichinho') await testPet();
 } catch (err) {
   check('execução sem exceções', false, err.stack);
 } finally {
