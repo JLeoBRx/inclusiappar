@@ -1,8 +1,10 @@
 /**
  * Inicialização do app SinalizaAção: Animais em Voga.
  *
- *   MENU ─┬─ 📖 LIVRO ─ explicação ─ AR (páginas → animais 3D + LIBRAS)
- *         └─ 🃏 JOGO ── explicação ─ AR (cartas → pontos)
+ *   MENU ─┬─ 📖 LIVRO ─────────── explicação ─ AR (páginas → animais 3D + LIBRAS)
+ *         └─ 🎮 SALA DE JOGOS ─┬─ 🃏 JOGO DE CARTAS ─── explicação ─ AR (cartas → pontos)
+ *                              ├─ 🐾 BICHINHO VIRTUAL ─ como jogar ─ quarto + cartas mágicas (AR)
+ *                              └─ 🔒 EM BREVE
  */
 import { Router } from './router.js';
 import { BookExperience } from './ar/bookAR.js';
@@ -10,6 +12,9 @@ import { GameExperience } from './game/cardGame.js';
 import { loadMindAR } from './ar/arSession.js';
 import { setupMenu } from './ui/menu.js';
 import { setupBookIntro, setupGameIntro } from './ui/instructions.js';
+import { setupSala } from './ui/sala.js';
+import { PetGame } from './pet/petGame.js';
+import { setupPetIntro } from './pet/petIntro.js';
 import { toast } from './ui/notifications.js';
 
 const params = new URLSearchParams(location.search);
@@ -20,6 +25,9 @@ const screens = {
   bookAR: $('[data-screen="book-ar"]'),
   gameIntro: $('[data-screen="game-intro"]'),
   gameAR: $('[data-screen="game-ar"]'),
+  sala: $('[data-screen="sala"]'),
+  petIntro: $('[data-screen="pet-intro"]'),
+  petGame: $('[data-screen="pet-game"]'),
 };
 
 /* ---------------------------------------------------------------- loading */
@@ -51,6 +59,7 @@ function withTimeout(promise, ms) {
 /* ---------------------------------------------------------------- telas */
 const book = new BookExperience(screens.bookAR);
 const game = new GameExperience(screens.gameAR);
+const pet = new PetGame(screens.petGame);
 let permit = null; // rota AR liberada por um toque em "Começar"
 let resumeGame = false;
 
@@ -93,6 +102,24 @@ const router = new Router({
       return game.leave();
     },
   },
+  sala: { screen: screens.sala, ...setupSala(screens.sala) },
+  bichinho: {
+    screen: screens.petIntro,
+    ...setupPetIntro(screens.petIntro, {
+      start: () => {
+        pet.markTutorialSeen();
+        router.go('bichinho/jogar');
+      },
+    }),
+  },
+  // o quarto não liga a câmera (ela só abre no botão "Cartas mágicas");
+  // na primeira vez, passa antes pelo "Como jogar?"
+  'bichinho/jogar': {
+    screen: screens.petGame,
+    guard: () => (pet.tutorialSeen() ? null : 'bichinho'),
+    enter: () => pet.enter(),
+    leave: () => pet.leave(),
+  },
 });
 
 /* ---------------------------------------------------------------- boot */
@@ -132,7 +159,7 @@ window.addEventListener('error', (event) => {
 });
 window.addEventListener('offline', () => toast('📶 Você está sem internet. O que já foi carregado continua funcionando.', { type: 'warning' }));
 
-if (params.has('test')) window.__app = { router, book, game };
+if (params.has('test')) window.__app = { router, book, game, pet };
 
 boot().catch((err) => {
   console.error(err);

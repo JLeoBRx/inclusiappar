@@ -47,7 +47,8 @@ export function loadMindAR() {
 }
 
 let sharedRenderer = null;
-function getRenderer() {
+/** Renderer WebGL único do app (também usado pelo quarto do Bichinho Virtual). */
+export function getRenderer() {
   if (!sharedRenderer) {
     try {
       sharedRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });

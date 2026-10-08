@@ -1,0 +1,175 @@
+/* =========================================================================
+   Sala de Jogos — escolha entre os jogos
+   (usa os tokens, botões e o cenário de Signária definidos em main.css)
+   ========================================================================= */
+
+.screen--sala { min-height: var(--vh); }
+.sala {
+  position: relative; z-index: 1; min-height: var(--vh);
+  display: flex; flex-direction: column; gap: 16px;
+  width: 100%; max-width: 600px; margin: 0 auto;
+  padding: calc(12px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
+}
+.sala__head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.sala__back { align-self: flex-start; }
+.sala__title {
+  font-size: clamp(2.3rem, 11vw, 3.3rem); color: #fff; letter-spacing: 0.01em;
+  text-shadow: 0 3px 0 var(--wood-dark), 0 10px 22px rgba(0, 0, 0, 0.55);
+}
+.sala__title-icon { display: inline-block; animation: hop 2.4s ease-in-out infinite; }
+.sala__lead {
+  max-width: 32ch; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: clamp(1rem, 4.2vw, 1.12rem);
+  background: rgba(7, 23, 15, 0.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.sala__lead strong { color: var(--gold-light); }
+.sala__games { display: flex; flex-direction: column; gap: 16px; }
+.sala__actions { display: flex; justify-content: center; margin-top: auto; padding-top: 4px; }
+.sala__actions .btn { min-width: 200px; }
+
+/* cartões dos jogos */
+.game-tile {
+  position: relative; display: grid; grid-template-columns: 108px minmax(0, 1fr);
+  grid-template-areas: "art body" "art cta"; align-items: center; gap: 6px 14px;
+  width: 100%; min-height: 144px; padding: 14px 16px 14px 12px; border: 0; border-radius: var(--radius-lg);
+  font: inherit; text-align: left; text-decoration: none; color: #3b2509; overflow: hidden; cursor: pointer;
+  background: linear-gradient(160deg, #fff4d2 0%, var(--gold-light) 42%, var(--gold) 100%);
+  box-shadow: 0 7px 0 #9c5a13, 0 16px 30px rgba(0, 0, 0, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.7);
+  transition: transform 0.15s ease, box-shadow 0.15s ease; touch-action: manipulation;
+}
+.game-tile::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.4) 50%, transparent 65%);
+  transform: translateX(-120%); animation: shine 6s ease-in-out infinite;
+}
+.game-tile:active { transform: translateY(4px); box-shadow: 0 3px 0 #9c5a13, 0 8px 18px rgba(0, 0, 0, 0.4); }
+.game-tile__art {
+  grid-area: art; position: relative; display: grid; place-items: center; width: 108px; height: 108px;
+  border-radius: 24px; background: rgba(255, 255, 255, 0.5); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.08);
+}
+.game-tile__body { grid-area: body; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.game-tile__tag { font-family: var(--font-display); font-weight: 800; font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(59, 37, 9, 0.7); }
+.game-tile--pet .game-tile__tag { color: rgba(44, 16, 71, 0.7); }
+.game-tile--soon .game-tile__tag { color: rgba(255, 247, 227, 0.65); }
+.game-tile__title { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.3rem, 6vw, 1.6rem); line-height: 1.05; }
+.game-tile__text { font-weight: 700; font-size: 0.95rem; line-height: 1.25; opacity: 0.92; }
+.game-tile__meta {
+  align-self: flex-start; margin-top: 4px; padding: 3px 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62); font-weight: 800; font-size: 0.8rem; line-height: 1.3;
+}
+.game-tile__cta {
+  grid-area: cta; justify-self: end; padding: 6px 16px; border-radius: 999px;
+  background: #3b2509; color: #ffe9a8; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; letter-spacing: 0.04em;
+}
+
+/* jogo 1 — leque de cartas */
+.fan { position: relative; width: 100%; height: 100%; }
+.fan img {
+  position: absolute; left: 50%; top: 50%; width: 50px; border-radius: 6px; border: 2px solid #fff;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+.fan img:nth-child(1) { transform: translate(-50%, -50%) translateX(-24px) rotate(-15deg); }
+.fan img:nth-child(2) { transform: translate(-50%, -50%) translateX(24px) rotate(15deg); }
+.fan img:nth-child(3) { z-index: 1; animation: fan-bob 3s ease-in-out infinite; }
+
+/* jogo 2 — Bichinho Virtual (mágico, lilás) */
+.game-tile--pet {
+  color: #2c1047;
+  background: linear-gradient(160deg, #fdf0ff 0%, #e6bfff 45%, #b57cf0 100%);
+  box-shadow: 0 7px 0 #6b3aa6, 0 16px 30px rgba(0, 0, 0, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.7);
+}
+.game-tile--pet:active { box-shadow: 0 3px 0 #6b3aa6, 0 8px 18px rgba(0, 0, 0, 0.4); }
+.game-tile--pet .game-tile__cta { background: #2c1047; color: #f4dcff; }
+.game-tile--pet::after { animation-delay: 2s; }
+.game-tile__new {
+  display: inline-block; margin-left: 6px; padding: 1px 9px; border-radius: 999px; vertical-align: 1px;
+  background: linear-gradient(90deg, #ff5f8f, #ff8a3d); color: #fff;
+  font-size: 0.7rem; letter-spacing: 0.08em; opacity: 1; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.orbit { position: relative; display: block; width: 100%; height: 100%; }
+.orbit b {
+  position: absolute; left: calc(50% - 0.5em); top: calc(50% - 0.55em); font-size: 3rem; line-height: 1;
+  animation: hop 2s ease-in-out infinite; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.25));
+}
+.orbit i { position: absolute; font-style: normal; font-size: 1.3rem; line-height: 1; animation: float 3s ease-in-out infinite; }
+.orbit i:nth-of-type(1) { left: 8px; top: 8px; }
+.orbit i:nth-of-type(2) { right: 8px; top: 10px; animation-delay: -0.8s; }
+.orbit i:nth-of-type(3) { left: 6px; bottom: 8px; animation-delay: -1.6s; }
+.orbit i:nth-of-type(4) { right: 6px; bottom: 6px; animation-delay: -2.2s; }
+.orbit em { position: absolute; left: calc(50% + 0.6em); top: 14px; font-style: normal; font-size: 1.1rem; animation: pulse 1.3s ease-in-out infinite; }
+
+/* jogo 3 — em breve (bloqueado) */
+.game-tile--soon {
+  grid-template-areas: "art body"; cursor: not-allowed;
+  color: rgba(255, 247, 227, 0.92); background: rgba(7, 23, 15, 0.6);
+  border: 2px dashed rgba(255, 247, 227, 0.42); box-shadow: none;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.game-tile--soon::after { display: none; }
+.game-tile--soon:active { transform: none; box-shadow: none; }
+.game-tile--soon .game-tile__art { background: rgba(255, 255, 255, 0.08); box-shadow: none; }
+.game-tile--soon .game-tile__title { color: var(--gold-light); }
+.game-tile--soon.is-locked { animation: shake 0.45s ease; }
+.mystery { position: relative; font-size: 2.9rem; line-height: 1; filter: grayscale(0.5) brightness(0.9); }
+.mystery b { position: absolute; right: -14px; bottom: -8px; font-size: 1.7rem; filter: none; animation: pulse 1.8s ease-in-out infinite; }
+
+/* entrada */
+.sala.is-entering .game-tile { animation: rise 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.sala.is-entering .game-tile:nth-child(2) { animation-delay: 0.08s; }
+.sala.is-entering .game-tile:nth-child(3) { animation-delay: 0.16s; }
+
+@keyframes fan-bob {
+  0%, 100% { transform: translate(-50%, -54%) rotate(-3deg); }
+  50% { transform: translate(-50%, -60%) rotate(3deg); }
+}
+
+/* paisagem (celular deitado): os três jogos lado a lado */
+@media (orientation: landscape) and (max-height: 540px) {
+  .sala { max-width: 1000px; gap: 10px; }
+  .sala__head { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px 14px; }
+  .sala__back { position: absolute; left: calc(12px + var(--safe-left)); top: calc(10px + var(--safe-top)); }
+  .sala__title { font-size: 2rem; }
+  .sala__lead { font-size: 0.95rem; padding: 4px 12px; }
+  .sala__games { flex-direction: row; gap: 12px; }
+  .game-tile {
+    flex: 1; grid-template-columns: 1fr; grid-template-areas: "art" "body" "cta"; justify-items: center;
+    min-height: 0; padding: 10px; gap: 6px; text-align: center;
+  }
+  .game-tile--soon { grid-template-areas: "art" "body"; }
+  .game-tile__art { width: 72px; height: 72px; border-radius: 18px; }
+  .game-tile__body { align-items: center; }
+  .game-tile__text { font-size: 0.82rem; }
+  .game-tile__meta { align-self: center; }
+  .game-tile__cta { justify-self: center; padding: 4px 14px; font-size: 0.85rem; }
+  .fan img { width: 34px; }
+  .fan img:nth-child(1) { transform: translate(-50%, -50%) translateX(-16px) rotate(-15deg); }
+  .fan img:nth-child(2) { transform: translate(-50%, -50%) translateX(16px) rotate(15deg); }
+  .orbit b { font-size: 2rem; }
+  .orbit i { font-size: 0.95rem; }
+  .mystery { font-size: 2rem; }
+  .sala__actions .btn { min-height: 42px; }
+}
+
+/* tablet e computador */
+@media (min-width: 960px) and (min-height: 600px) {
+  .sala { max-width: 1140px; justify-content: center; gap: 28px; }
+  .sala__back { position: absolute; left: calc(24px + var(--safe-left)); top: calc(20px + var(--safe-top)); }
+  .sala__games { flex-direction: row; align-items: stretch; gap: 24px; }
+  .game-tile {
+    flex: 1; grid-template-columns: 1fr; grid-template-areas: "art" "body" "cta"; justify-items: center;
+    padding: 26px 22px; gap: 14px; text-align: center;
+  }
+  .game-tile--soon { grid-template-areas: "art" "body"; }
+  .game-tile__art { width: 160px; height: 160px; border-radius: 32px; }
+  .game-tile__body { align-items: center; }
+  .game-tile__meta { align-self: center; }
+  .game-tile__cta { justify-self: center; }
+  .game-tile:not(.game-tile--soon):hover { transform: translateY(-4px); }
+  .fan img { width: 70px; }
+  .fan img:nth-child(1) { transform: translate(-50%, -50%) translateX(-36px) rotate(-15deg); }
+  .fan img:nth-child(2) { transform: translate(-50%, -50%) translateX(36px) rotate(15deg); }
+  .orbit b { font-size: 4.4rem; }
+  .orbit i { font-size: 1.8rem; }
+  .mystery { font-size: 4rem; }
+}

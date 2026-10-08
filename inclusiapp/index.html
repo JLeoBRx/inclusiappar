@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SinalizaAção — Animais em Voga · Realidade Aumentada</title>
-<meta name="description" content="Livro em Realidade Aumentada e jogo de cartas do SinalizaAção: Animais em Voga — animais em 3D e LIBRAS.">
+<meta name="description" content="Livro em Realidade Aumentada e Sala de Jogos (Jogo de Cartas e Bichinho Virtual) do SinalizaAção: Animais em Voga — animais em 3D e LIBRAS.">
 <meta name="theme-color" content="#0f3323">
 <meta name="color-scheme" content="dark">
 <meta name="mobile-web-app-capable" content="yes">
@@ -18,6 +18,8 @@
 <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/img/logo.webp" as="image">
 <link rel="stylesheet" href="src/styles/main.css">
+<link rel="stylesheet" href="src/styles/sala.css">
+<link rel="stylesheet" href="src/styles/pet.css">
 </head>
 <body>
 <a class="skip-link" href="#app">Pular para o conteúdo</a>
@@ -62,11 +64,11 @@
           </span>
           <span class="menu-btn__arrow" aria-hidden="true">›</span>
         </a>
-        <a class="menu-btn menu-btn--game" href="#/jogo">
-          <span class="menu-btn__icon" aria-hidden="true">🃏</span>
+        <a class="menu-btn menu-btn--game" href="#/sala">
+          <span class="menu-btn__icon" aria-hidden="true">🎮</span>
           <span class="menu-btn__text">
-            <span class="menu-btn__title">JOGO DE CARTAS</span>
-            <span class="menu-btn__sub">Encontre a carta e ganhe pontos</span>
+            <span class="menu-btn__title">SALA DE JOGOS</span>
+            <span class="menu-btn__sub">Jogo de Cartas, Bichinho Virtual e mais</span>
           </span>
           <span class="menu-btn__arrow" aria-hidden="true">›</span>
         </a>
@@ -179,7 +181,7 @@
       <div class="intro__actions">
         <button class="btn btn--secondary btn--xl" type="button" data-action="continue-game" hidden>▶️ CONTINUAR JOGO <small data-continue-info></small></button>
         <button class="btn btn--primary btn--xl" type="button" data-action="start-game">🎮 COMEÇAR JOGO</button>
-        <a class="btn btn--ghost" href="#/">← VOLTAR</a>
+        <a class="btn btn--ghost" href="#/sala">← VOLTAR</a>
       </div>
     </div>
   </section>
@@ -311,6 +313,269 @@
         <span class="spinner spinner--lg" aria-hidden="true"></span>
         <p data-status-text>Preparando o jogo...</p>
         <div class="progress"><div class="progress__bar" data-status-bar></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== SALA DE JOGOS -->
+  <section class="screen screen--sala" data-screen="sala" aria-labelledby="sala-title" hidden>
+    <div class="scenery" aria-hidden="true">
+      <div class="scenery__bg"></div>
+      <div class="scenery__shade"></div>
+      <div class="leaves"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="sala">
+      <header class="sala__head">
+        <a class="chip-btn sala__back" href="#/" aria-label="Voltar ao menu">← Menu</a>
+        <h1 id="sala-title" class="sala__title"><span class="sala__title-icon" aria-hidden="true">🎮</span> Sala de Jogos</h1>
+        <p class="sala__lead">Escolha um jogo e divirta-se aprendendo <strong>LIBRAS</strong>!</p>
+      </header>
+      <nav class="sala__games" aria-label="Jogos">
+        <a class="game-tile game-tile--cards" href="#/jogo">
+          <span class="game-tile__art" aria-hidden="true">
+            <span class="fan">
+              <img src="assets/img/carta-exemplo-16.webp" alt="" width="220" height="305" loading="lazy">
+              <img src="assets/img/carta-exemplo-7.webp" alt="" width="220" height="331" loading="lazy">
+              <img src="assets/img/carta-exemplo-2.webp" alt="" width="220" height="310" loading="lazy">
+            </span>
+          </span>
+          <span class="game-tile__body">
+            <span class="game-tile__tag">JOGO 1</span>
+            <span class="game-tile__title"><span aria-hidden="true">🃏</span> Jogo de Cartas</span>
+            <span class="game-tile__text">Encontre a carta sorteada e ganhe pontos!</span>
+            <span class="game-tile__meta" data-tile-meta="cards" hidden></span>
+          </span>
+          <span class="game-tile__cta" aria-hidden="true">JOGAR ›</span>
+        </a>
+        <a class="game-tile game-tile--pet" href="#/bichinho">
+          <span class="game-tile__art" aria-hidden="true">
+            <span class="orbit"><b>🐘</b><i>🐝</i><i>🦎</i><i>🐆</i><i>🐻</i><em>✨</em></span>
+          </span>
+          <span class="game-tile__body">
+            <span class="game-tile__tag">JOGO 2 <span class="game-tile__new">NOVO!</span></span>
+            <span class="game-tile__title"><span aria-hidden="true">🐾</span> Bichinho Virtual</span>
+            <span class="game-tile__text">Cuide dos 5 animais com as cartas mágicas de LIBRAS!</span>
+            <span class="game-tile__meta" data-tile-meta="pet"></span>
+          </span>
+          <span class="game-tile__cta" aria-hidden="true">JOGAR ›</span>
+        </a>
+        <button class="game-tile game-tile--soon" type="button" aria-disabled="true" data-action="soon">
+          <span class="game-tile__art" aria-hidden="true"><span class="mystery">🎁<b>🔒</b></span></span>
+          <span class="game-tile__body">
+            <span class="game-tile__tag">JOGO 3</span>
+            <span class="game-tile__title"><span aria-hidden="true">🔒</span> Em breve</span>
+            <span class="game-tile__text">Um novo jogo está chegando. Aguarde as novidades!</span>
+          </span>
+        </button>
+      </nav>
+      <div class="sala__actions"><a class="btn btn--ghost" href="#/">← VOLTAR</a></div>
+    </div>
+  </section>
+
+  <!-- ========================================================== BICHINHO VIRTUAL: COMO JOGAR -->
+  <section class="screen screen--intro" data-screen="pet-intro" aria-labelledby="pet-intro-title" hidden>
+    <div class="scenery scenery--dim" aria-hidden="true"><div class="scenery__bg"></div><div class="scenery__shade"></div></div>
+    <div class="intro">
+      <article class="intro__card intro__card--pet">
+        <header class="intro__head">
+          <h1 id="pet-intro-title" class="intro__title"><span aria-hidden="true">🐾</span> COMO JOGAR?</h1>
+          <p class="intro__lead">Cuide dos 5 animais de <strong>Signária</strong> com a ajuda das <strong>cartas mágicas</strong> de&nbsp;LIBRAS!&nbsp;<span aria-hidden="true">✨</span></p>
+        </header>
+        <figure class="intro__art pet-art" aria-label="Ilustração: o celular escaneia uma carta e a magia chega até o elefante, que está no quarto com os outros bichinhos">
+          <div class="pet-art__scene" aria-hidden="true">
+            <div class="pet-art__room">
+              <span class="pet-art__window"></span>
+              <span class="pet-art__frame">🐾</span>
+              <span class="pet-art__rug"></span>
+              <span class="pet-art__hero">🐘</span>
+              <span class="pet-art__bubble">🍎</span>
+              <span class="pet-art__friends"><i>🐝</i><i>🦎</i><i>🐆</i><i>🐻</i></span>
+            </div>
+            <div class="pet-art__phone">
+              <div class="pet-art__screen">
+                <img src="assets/img/carta-exemplo-2.webp" alt="" width="220" height="310">
+                <span class="pet-art__scan"></span>
+              </div>
+            </div>
+            <span class="pet-art__trail"><i>✨</i><i>✨</i><i>✨</i></span>
+            <span class="pet-art__spell">💦</span>
+            <span class="art-tag pet-art__tag pet-art__tag--card">🃏 CARTA MÁGICA</span>
+            <span class="art-tag pet-art__tag pet-art__tag--pet">🐾 SEU BICHINHO</span>
+          </div>
+          <div class="pet-art__needs" aria-hidden="true"><span>🍎</span><span>💧</span><span>🛁</span><span>🎾</span><span>😴</span><span>❤️</span></div>
+        </figure>
+        <div class="intro__body">
+          <ol class="pet-steps">
+            <li class="pet-step">
+              <span class="pet-step__icon" aria-hidden="true">🐾</span>
+              <div class="pet-step__text">
+                <h3>1. Escolha um bichinho</h3>
+                <p>Escolha qual dos 5 animais você deseja cuidar.</p>
+                <p class="pet-step__pets" aria-hidden="true"><span>🐝</span><span>🐘</span><span>🦎</span><span>🐆</span><span>🐻</span></p>
+              </div>
+            </li>
+            <li class="pet-step">
+              <span class="pet-step__icon" aria-hidden="true">👀</span>
+              <div class="pet-step__text">
+                <h3>2. Observe suas necessidades</h3>
+                <p>Seu bichinho poderá ficar:</p>
+                <ul class="pet-chips">
+                  <li><span aria-hidden="true">🍎</span> Com fome</li>
+                  <li><span aria-hidden="true">💧</span> Com sede</li>
+                  <li><span aria-hidden="true">🛁</span> Sujo</li>
+                  <li><span aria-hidden="true">🎾</span> Entediado</li>
+                  <li><span aria-hidden="true">😴</span> Com sono</li>
+                  <li><span aria-hidden="true">❤️</span> Doente</li>
+                </ul>
+              </div>
+            </li>
+            <li class="pet-step pet-step--magic">
+              <span class="pet-step__icon" aria-hidden="true">✨</span>
+              <div class="pet-step__text">
+                <h3>3. Use as cartas mágicas</h3>
+                <p>Aponte a câmera ou escaneie uma das cartas AR de LIBRAS.</p>
+                <p>A carta reconhecida realizará uma ação no jogo.</p>
+              </div>
+            </li>
+            <li class="pet-step">
+              <span class="pet-step__icon" aria-hidden="true">💛</span>
+              <div class="pet-step__text">
+                <h3>4. Cuide do seu bichinho</h3>
+                <p>Alimente, dê água, dê banho, brinque, cuide da saúde e coloque-o para dormir quando necessário.</p>
+              </div>
+            </li>
+            <li class="pet-step">
+              <span class="pet-step__icon" aria-hidden="true">⏰</span>
+              <div class="pet-step__text">
+                <h3>5. Continue cuidando</h3>
+                <p>Os estados dos animais continuam evoluindo com o tempo. Volte sempre para cuidar deles!</p>
+              </div>
+            </li>
+          </ol>
+          <div class="callout callout--magic">
+            <h3>✨ Dica mágica</h3>
+            <p>Cada carta faz uma magia diferente. As cartas com os <strong>sinais dos animais em LIBRAS</strong> cuidam dos 5 bichinhos de uma vez! Veja todas no <strong>📖 Livro de Magias</strong>, dentro do jogo.</p>
+          </div>
+          <p class="intro__note"><strong>💾 O progresso fica salvo neste aparelho</strong>, mesmo fechando o aplicativo. Ele só é apagado se os dados do navegador ou do aplicativo forem limpos.</p>
+        </div>
+      </article>
+      <div class="intro__actions">
+        <button class="btn btn--primary btn--xl" type="button" data-action="start-pet"><span data-pet-label>🐾 COMEÇAR A CUIDAR</span> <small data-pet-info hidden></small></button>
+        <a class="btn btn--ghost" href="#/sala">← VOLTAR</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== BICHINHO VIRTUAL: JOGO -->
+  <section class="screen screen--pet" data-screen="pet-game" aria-label="Bichinho Virtual" hidden>
+    <div class="pet-app">
+      <header class="pet-topbar">
+        <a class="chip-btn" href="#/sala" aria-label="Voltar à Sala de Jogos">← Sala</a>
+        <h1 class="pet-topbar__title"><span aria-hidden="true">🐾</span> Bichinho Virtual</h1>
+        <span class="pet-topbar__stars" data-stars aria-label="Estrelas">⭐ 0</span>
+        <button class="chip-btn chip-btn--icon" type="button" data-action="book" aria-label="Livro de Magias">📖</button>
+        <a class="chip-btn chip-btn--icon" href="#/bichinho" aria-label="Como jogar">❓</a>
+        <button class="chip-btn chip-btn--icon" type="button" data-action="sound" aria-pressed="true" aria-label="Desligar sons">🔊</button>
+      </header>
+
+      <nav class="pet-picker" data-picker aria-label="Escolha o bichinho"></nav>
+
+      <div class="pet-room" data-room data-theme="mel">
+        <div class="pet-room__wall" aria-hidden="true">
+          <span class="pet-room__window"><i></i></span>
+          <span class="pet-room__frame" data-room-frame></span>
+          <span class="pet-room__shelf"><i>🌻</i><i>📚</i></span>
+        </div>
+        <div class="pet-room__floor" aria-hidden="true"><span class="pet-room__rug"></span></div>
+        <div class="pet-room__fallback" data-room-fallback aria-hidden="true"></div>
+        <div class="pet-room__stage" data-room-stage></div>
+        <div class="pet-room__night" aria-hidden="true"><span class="zzz"><i>z</i><i>z</i><i>Z</i></span></div>
+        <div class="pet-room__dirt" aria-hidden="true"><i></i><i></i><b></b><b></b></div>
+        <span class="pet-room__thermo" aria-hidden="true">🌡️</span>
+        <div class="pet-room__poops" data-poops></div>
+        <button class="pet-room__hit" type="button" data-action="caress" aria-label="Fazer carinho"></button>
+        <div class="pet-bubble" data-bubble aria-hidden="true" hidden></div>
+        <div class="pet-speech" data-speech role="status" hidden></div>
+        <div class="room-badge" data-room-badge hidden></div>
+        <div class="pet-room__loading" data-room-loading hidden><span class="spinner" aria-hidden="true"></span> Chegando...</div>
+      </div>
+
+      <section class="pet-panel" aria-label="Necessidades e cuidados">
+        <div class="pet-mood" data-mood aria-live="polite"></div>
+        <ul class="pet-needs" data-needs aria-label="Necessidades"></ul>
+        <div class="pet-actions" data-actions role="group" aria-label="Cuidados"></div>
+        <button class="btn btn--magic btn--xl" type="button" data-action="magic">✨ CARTAS MÁGICAS</button>
+      </section>
+    </div>
+
+    <!-- câmera: cartas mágicas -->
+    <div class="pet-magic" data-magic hidden>
+      <div class="ar-stage" data-magic-stage></div>
+      <div class="pet-magic__ui">
+        <header class="ar-topbar">
+          <button class="chip-btn" type="button" data-action="close-magic">✕ Fechar</button>
+          <div class="ar-title">✨ Cartas mágicas</div>
+          <span class="pet-magic__pet" data-magic-pet></span>
+          <button class="chip-btn chip-btn--icon" type="button" data-action="book" aria-label="Livro de Magias">📖</button>
+        </header>
+        <div class="ar-scan ar-scan--card pet-magic__scan">
+          <div class="ar-scan__frame" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="ar-scan__line"></span></div>
+          <p class="ar-scan__text"><strong>Mostre uma carta mágica ✨</strong><span>Aponte a câmera para uma carta de LIBRAS</span></p>
+        </div>
+        <div class="spell" data-spell role="status" hidden></div>
+        <div class="pet-magic__needs" data-magic-needs aria-hidden="true"></div>
+      </div>
+      <div class="ar-status" data-status hidden>
+        <div class="ar-status__card">
+          <span class="spinner spinner--lg" aria-hidden="true"></span>
+          <p data-status-text>Preparando a magia... ✨</p>
+          <div class="progress"><div class="progress__bar" data-status-bar></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-fx" data-fx aria-hidden="true"></div>
+
+    <!-- janelas -->
+    <div class="pet-modal" data-modal="choose" role="dialog" aria-modal="true" aria-labelledby="choose-title" hidden>
+      <div class="pet-modal__card">
+        <h2 id="choose-title" class="pet-modal__title">🐾 Escolha um bichinho</h2>
+        <p class="pet-modal__text">Qual dos 5 animais você quer cuidar primeiro? Depois você pode trocar quando quiser e cuidar de todos!</p>
+        <div class="choose-grid" data-choose-list></div>
+      </div>
+    </div>
+
+    <div class="pet-modal" data-modal="away" role="dialog" aria-modal="true" aria-labelledby="away-title" hidden>
+      <div class="pet-modal__card">
+        <div class="pet-modal__icon" aria-hidden="true">⏰</div>
+        <h2 id="away-title" class="pet-modal__title">Enquanto você estava fora...</h2>
+        <p class="pet-modal__text" data-away-time></p>
+        <ul class="away-list" data-away-list></ul>
+        <button class="btn btn--primary btn--xl" type="button" data-close data-autofocus>🐾 CUIDAR AGORA</button>
+      </div>
+    </div>
+
+    <div class="pet-modal" data-modal="hint" role="dialog" aria-modal="true" aria-labelledby="hint-title" hidden>
+      <div class="pet-modal__card">
+        <div class="pet-modal__icon" data-hint-icon aria-hidden="true">🎒</div>
+        <h2 id="hint-title" class="pet-modal__title" data-hint-title>Acabou!</h2>
+        <p class="pet-modal__text">Use uma destas <strong>cartas mágicas</strong> para conseguir mais:</p>
+        <ul class="hint-cards" data-hint-cards></ul>
+        <div class="pet-modal__actions">
+          <button class="btn btn--magic btn--xl" type="button" data-action="magic" data-autofocus>✨ USAR CARTAS MÁGICAS</button>
+          <button class="btn btn--ghost" type="button" data-close>Agora não</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-modal" data-modal="book" role="dialog" aria-modal="true" aria-labelledby="book-title" hidden>
+      <div class="pet-modal__card pet-book">
+        <header class="pet-book__head">
+          <h2 id="book-title" class="pet-modal__title">📖 Livro de Magias</h2>
+          <button class="pet-modal__close" type="button" data-close aria-label="Fechar">✕</button>
+        </header>
+        <p class="pet-book__intro">Cada carta tem uma magia! <strong data-book-count></strong></p>
+        <div class="pet-book__groups" data-book-groups></div>
       </div>
     </div>
   </section>

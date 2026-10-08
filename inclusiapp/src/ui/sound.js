@@ -33,7 +33,7 @@ export function setSound(on) {
   storage.set('sound', on);
 }
 
-function tone(freq, start, duration, { type = 'sine', gain = 0.18, slide = 0 } = {}) {
+export function tone(freq, start, duration, { type = 'sine', gain = 0.18, slide = 0 } = {}) {
   const ac = audio();
   if (!ac || !enabled) return;
   const t0 = ac.currentTime + start;
