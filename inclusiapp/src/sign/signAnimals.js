@@ -143,16 +143,17 @@ export class AnimalParade {
     // cada animal ocupa ~1 de largura em 3/4. O tamanho é o mesmo para 1, 2
     // ou 3 animais — o tamanho não pode "entregar" a resposta.
     const GAP = 1.2;
-    const usableW = portrait ? viewW : viewW * 0.55;
+    // no celular deitado, o painel de respostas ocupa a metade direita da tela
+    const phoneLandscape = !portrait && height <= 540;
+    const usableW = portrait ? viewW : viewW * (phoneLandscape ? 0.42 : 0.55);
     const size = Math.min(usableW / (3 * GAP + 0.2), viewH * (portrait ? 0.22 : 0.3));
     this.critters.forEach((c, i) => {
       c.group.position.x = (i - (n - 1) / 2) * GAP;
       c.group.position.z = 0;
     });
     // um pouco abaixo do centro da tela, acima do painel de respostas; no
-    // celular deitado o painel fica à direita, então os animais vão para a esquerda
-    const phoneLandscape = !portrait && height <= 540;
-    const centerX = phoneLandscape ? -0.2 * viewW : 0;
+    // celular deitado, os animais ficam na metade esquerda
+    const centerX = phoneLandscape ? -0.28 * viewW : 0;
     const centerY = portrait ? -0.06 * viewH : phoneLandscape ? -0.16 * viewH : -0.1 * viewH;
     this.stage.position.set(centerX, centerY, -distance);
     this.stage.rotation.set(0.28, 0, 0);
