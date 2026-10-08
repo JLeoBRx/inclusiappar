@@ -33,6 +33,8 @@ const MIME = {
   '.webm': 'video/webm',
   '.glb': 'model/gltf-binary',
   '.mind': 'application/octet-stream',
+  '.wasm': 'application/wasm',
+  '.task': 'application/octet-stream',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
 };
