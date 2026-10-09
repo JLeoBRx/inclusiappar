@@ -1,0 +1,284 @@
+/* =========================================================================
+   ✋ Sinalize e Conte — Jogo 3 da Sala de Jogos
+   (usa os tokens, botões, telas de AR, revelação da carta, avisos e resumo
+   definidos em main.css; aqui ficam só as peças próprias deste jogo)
+   ========================================================================= */
+
+:root {
+  --sg-teal: #1fb5a3;
+  --sg-teal-dark: #0f6d62;
+  --sg-teal-deep: #08332d;
+  --sg-teal-light: #c9f5ee;
+  --sg-good: #3ddc84;
+  --sg-warn: #ffd979;
+  --sg-bad: #ff8a6b;
+}
+
+/* ------------------------------------------------------------- como jogar */
+.intro__card--sign .intro__title { color: var(--sg-teal-dark); }
+.intro__card--sign .intro__lead strong { color: var(--sg-teal-dark); }
+
+.sign-art { background: radial-gradient(120% 90% at 50% 0%, rgba(160, 236, 224, 0.75), transparent 70%), linear-gradient(180deg, #e9fbf8, #fdf3da); }
+.sign-flow { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px; font-family: var(--font-display); font-weight: 800; }
+.sign-flow__step { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 76px; }
+.sign-flow__step:not(:last-child)::after {
+  content: '➜'; position: absolute; right: -18px; top: 28px; color: var(--sg-teal-dark); font-size: 1rem; animation: nudge-x 1.6s ease-in-out infinite;
+}
+.sign-flow__visual { position: relative; display: grid; place-items: center; width: 70px; height: 74px; }
+.sign-flow__label { font-size: 0.68rem; letter-spacing: 0.04em; color: var(--sg-teal-dark); text-align: center; line-height: 1.1; }
+.sign-flow__card img { width: 46px; border-radius: 6px; border: 2px solid #fff; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); animation: deal 3s ease-in-out infinite; }
+.sign-flow__card b, .sg-card__letter, .sg-reveal__letter {
+  position: absolute; display: grid; place-items: center; border-radius: 50%;
+  background: linear-gradient(180deg, #fff6d0, var(--gold)); color: #5a3818; font-family: var(--font-display); font-weight: 800;
+  box-shadow: 0 3px 0 #a35d11, 0 6px 10px rgba(0, 0, 0, 0.25); line-height: 1;
+}
+.sign-flow__card b { right: 2px; top: 2px; width: 26px; height: 26px; font-size: 1rem; }
+.sign-flow__scan b { font-size: 2.2rem; animation: phone-aim 2.4s ease-in-out infinite; }
+.sign-flow__scan i { position: absolute; left: 12px; right: 12px; height: 2px; background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: scan 1.6s ease-in-out infinite; }
+.sign-flow__hand b { font-size: 2.6rem; animation: wave 2.2s ease-in-out infinite; transform-origin: 70% 80%; }
+.sign-flow__hand em { position: absolute; right: 6px; top: 4px; font-style: normal; font-size: 1rem; animation: pulse 1.2s ease-in-out infinite; }
+.sign-flow__animals { display: flex; gap: 2px; font-size: 1.7rem; }
+.sign-flow__animals i { font-style: normal; animation: hop 1.6s ease-in-out infinite; }
+.sign-flow__animals i:nth-child(2) { animation-delay: -0.5s; }
+.sign-flow__answer { display: flex; gap: 4px; }
+.sign-flow__answer i {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-style: normal; font-size: 0.85rem;
+  background: #fff; color: var(--sg-teal-dark); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+.sign-flow__answer i:nth-child(2) { background: var(--sg-teal); color: #fff; animation: pulse 1.4s ease-in-out infinite; }
+@media (max-width: 519px) {
+  .sign-flow__step:nth-child(3)::after { display: none; }
+}
+
+.sign-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.sign-step {
+  position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px 12px 12px;
+  background: #fff; border: 2px solid #d5efe9; border-radius: var(--radius-sm);
+}
+.sign-step__num {
+  position: absolute; left: -6px; top: -8px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--sg-teal); color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem;
+  box-shadow: 0 2px 0 var(--sg-teal-dark);
+}
+.sign-step__icon {
+  flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px;
+  font-size: 1.5rem; background: var(--sg-teal-light); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.06);
+}
+.sign-step__text { min-width: 0; }
+.sign-step h3 { font-size: 1.12rem; color: var(--sg-teal-dark); margin-bottom: 2px; }
+.sign-step--hand { border-color: #9fe3d8; background: linear-gradient(180deg, #fff, #ecfbf8); }
+.sign-step--hand .sign-step__icon { background: linear-gradient(135deg, #7ee0d2, #ffd979); }
+.sign-step__answers { display: flex; gap: 8px; margin-top: 6px; }
+.sign-step__answers span {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; color: #fff;
+  background: linear-gradient(180deg, #4fd1c0, var(--sg-teal-dark)); box-shadow: 0 3px 0 var(--sg-teal-deep);
+}
+
+.callout--star { background: #fff6dc; border-left-color: var(--gold); }
+.callout--star h3 { color: #8a5310; }
+.callout--tip { background: #eaf8f5; border-left-color: var(--sg-teal); }
+.sign-points { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.95rem; }
+.sign-points li { display: flex; gap: 8px; align-items: baseline; }
+
+.sign-vowels-box { display: flex; flex-direction: column; gap: 8px; }
+.sign-vowels { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.sign-vowel { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.sign-vowel__card { width: 100%; max-width: 86px; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
+.sign-vowel__letter {
+  position: absolute; top: -8px; right: -2px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(180deg, #fff6d0, var(--gold)); color: #5a3818; font-family: var(--font-display); font-weight: 800;
+  box-shadow: 0 2px 0 #a35d11;
+}
+.sign-vowel__animal { font-weight: 800; font-size: 0.78rem; line-height: 1.1; color: var(--ink-soft); }
+
+.sign-records {
+  padding: 12px 14px; border-radius: var(--radius-sm); background: linear-gradient(180deg, #fffaf0, #fff1c9);
+  border: 2px solid #f2dc9c; color: var(--ink);
+}
+.sign-records h3 { font-size: 1.1rem; color: #8a5310; margin-bottom: 6px; }
+.sign-records__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; }
+.sign-records__list div { padding: 6px 4px; border-radius: 10px; background: rgba(255, 255, 255, 0.75); text-align: center; }
+.sign-records__list dt { font-size: 0.72rem; font-weight: 800; color: var(--ink-soft); line-height: 1.15; }
+.sign-records__list dd { margin: 2px 0 0; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; line-height: 1.1; }
+.sign-records__totals { margin-top: 6px; font-size: 0.85rem; font-weight: 700; color: var(--ink-soft); text-align: center; }
+.sign-records__empty { font-weight: 700; color: var(--ink-soft); }
+.sign-records__new {
+  display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 999px; vertical-align: 2px;
+  background: linear-gradient(90deg, #ff5f8f, #ff8a3d); color: #fff; font-size: 0.62rem; letter-spacing: 0.06em;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------- jogo: mão desenhada */
+.sg-hands { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
+
+/* placar */
+.sg-hud {
+  position: absolute; left: 50%; top: calc(62px + var(--safe-top)); transform: translateX(-50%);
+  width: min(calc(100% - 20px), 520px); display: flex; gap: 12px; align-items: center;
+  padding: 8px 12px 8px 8px; border-radius: var(--radius-lg); background: var(--glass-strong);
+  border: 1px solid var(--glass-border); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: var(--shadow); color: #fff;
+}
+.sg-card { flex: none; width: clamp(64px, 18vw, 86px); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.sg-card__label { font-family: var(--font-display); font-weight: 800; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--gold-light); white-space: nowrap; }
+.sg-card__slot { width: 100%; }
+.sg-card__letter { right: -8px; top: -8px; z-index: 2; width: 30px; height: 30px; font-size: 1.15rem; transform: scale(0); transition: transform 0.35s cubic-bezier(0.2, 1.5, 0.4, 1) 0.25s; }
+.sg-card__slot.has-card .sg-card__letter { transform: scale(1); }
+.sg-hud__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.sg-round {
+  align-self: flex-start; padding: 3px 12px; border-radius: 999px; background: rgba(31, 181, 163, 0.28);
+  font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; letter-spacing: 0.06em; color: #c9fff5;
+}
+.sg-round strong { font-size: 1.2rem; color: #fff; }
+.sg-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 0; }
+.sg-stats div { padding: 4px 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.09); text-align: center; }
+.sg-stats dt { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.03em; opacity: 0.85; }
+.sg-stats dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.sg-stats dd.bump { animation: bump 0.5s ease; }
+
+/* 📷 escanear */
+.screen--sign .sg-scan { top: 60%; }
+.screen--sign .sg-scan .ar-scan__frame { width: 52%; }
+.sg-scan__hint.is-warn { color: #ffcfbf; font-weight: 800; }
+.ar-ui .sg-scan .sg-skip { pointer-events: auto; }
+
+/* painéis de baixo (sinal e contagem) */
+.sg-panel {
+  position: absolute; left: 50%; bottom: calc(10px + var(--safe-bottom)); transform: translateX(-50%);
+  width: min(calc(100% - 20px), 520px); padding: 12px 14px; border-radius: var(--radius-lg);
+  background: var(--glass-strong); border: 1px solid var(--glass-border); color: #fff;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--shadow);
+  animation: sg-rise 0.4s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+
+/* ✋ sinal */
+.sg-sign { display: flex; gap: 12px; align-items: center; }
+.sg-sign__card { flex: none; width: clamp(64px, 19vw, 92px); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4); background: #3c4a3e; }
+.sg-sign__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.sg-sign__title { font-size: clamp(1.25rem, 5.6vw, 1.6rem); color: var(--gold-light); line-height: 1.05; }
+.sg-sign__status {
+  padding: 5px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); font-weight: 800; font-size: 0.95rem; line-height: 1.2;
+  transition: background-color 0.25s;
+}
+.sg-sign__status[data-state="match"] { background: rgba(61, 220, 132, 0.28); }
+.sg-sign__status[data-state="other"] { background: rgba(255, 138, 107, 0.28); }
+.sg-sign__status[data-state="hint"] { background: rgba(255, 217, 121, 0.2); }
+.sg-sign__status[data-state="error"] { background: rgba(229, 72, 77, 0.35); }
+.sg-meter { position: relative; height: 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.sg-meter i {
+  position: absolute; inset: 0; transform-origin: left center; transform: scaleX(var(--progress, 0));
+  border-radius: inherit; background: linear-gradient(90deg, #7ee0d2, var(--sg-good)); transition: transform 0.12s linear;
+}
+.sg-meter.is-full i { background: linear-gradient(90deg, var(--sg-good), #b8f5cc); }
+.sg-timer { display: flex; align-items: baseline; gap: 6px; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; }
+.sg-timer output { font-size: 1.15rem; font-variant-numeric: tabular-nums; min-width: 3.4em; }
+.sg-sign__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sg-sign__actions:not(:has(:not([hidden]))) { display: none; }
+
+/* 🐾 olhando os animais */
+.sg-watch {
+  position: absolute; left: 50%; top: calc(214px + var(--safe-top)); transform: translateX(-50%);
+  pointer-events: none;
+}
+.sg-watch p {
+  padding: 8px 18px; border-radius: 999px; background: rgba(7, 23, 15, 0.78); color: #fff; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; box-shadow: var(--shadow-soft);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* 🔢 contagem */
+.sg-count { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.sg-count__q { font-size: clamp(1.3rem, 6vw, 1.75rem); color: var(--gold-light); line-height: 1.1; }
+.sg-count__fallback { font-size: 2.6rem; line-height: 1.1; letter-spacing: 0.1em; }
+.sg-answers { display: flex; justify-content: center; gap: clamp(12px, 5vw, 26px); }
+.sg-answer {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  width: clamp(76px, 22vw, 96px); height: clamp(76px, 22vw, 96px); border: 0; border-radius: 50%;
+  background: linear-gradient(180deg, #6fe0d0 0%, var(--sg-teal) 55%, var(--sg-teal-dark) 100%); color: #fff;
+  box-shadow: 0 6px 0 var(--sg-teal-deep), 0 12px 20px rgba(0, 0, 0, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  font-family: var(--font-display); font-weight: 800; touch-action: manipulation; transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.sg-answer__n { font-size: clamp(2.2rem, 10vw, 2.8rem); line-height: 1; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); }
+.sg-answer__dots { font-size: 0.7rem; letter-spacing: 0.2em; opacity: 0.9; }
+.sg-answer:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--sg-teal-deep), 0 6px 12px rgba(0, 0, 0, 0.3); }
+.sg-answer:disabled { cursor: default; }
+.sg-answer.is-wrong { background: linear-gradient(180deg, #ffb39e, #e5484d); box-shadow: 0 6px 0 #8f2124, 0 12px 20px rgba(0, 0, 0, 0.35); animation: shake 0.45s ease; }
+.sg-answer.is-right { background: linear-gradient(180deg, #8ff0b8, #23a356); box-shadow: 0 6px 0 #17713b, 0 0 0 6px rgba(61, 220, 132, 0.45); animation: bump 0.5s ease; }
+
+/* mensagens curtas (não cobrem a mão nem os animais) */
+.sg-flash {
+  --tx: -50%;
+  position: absolute; left: 50%; top: calc(214px + var(--safe-top)); transform: translateX(-50%); z-index: 8;
+  width: max-content; max-width: min(92vw, 480px); padding: 10px 18px; border-radius: var(--radius);
+  background: rgba(10, 30, 20, 0.92); color: #fff; text-align: center; font-weight: 800; font-size: 1.02rem; line-height: 1.25;
+  box-shadow: var(--shadow); border: 2px solid var(--sky); pointer-events: none;
+}
+.sg-flash.is-in { animation: pop 0.35s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.sg-flash[data-kind="ok"] { border-color: var(--sg-good); }
+.sg-flash[data-kind="wrong"] { border-color: var(--danger); background: rgba(120, 22, 26, 0.92); animation: pop 0.3s ease, shake 0.45s 0.1s ease; }
+.sg-flash[data-kind="warn"] { border-color: var(--gold); background: rgba(110, 66, 8, 0.92); }
+
+/* revelação da carta (estende a do Jogo de Cartas) */
+.sg-reveal .reveal__card { position: relative; }
+.sg-reveal__letter { right: 8px; top: 8px; width: 58px; height: 58px; font-size: 2.2rem; }
+.sg-reveal .reveal__name { font-size: 1.35rem; }
+
+/* resultado */
+.sg-summary .summary__card { max-width: 460px; padding: 18px 16px; }
+.sg-summary .summary__icon { font-size: 2.6rem; }
+.sg-summary .summary__card h2 { font-size: 1.75rem; }
+.sg-summary .summary__stats div { padding: 6px; }
+.sg-summary .summary__stats dd { font-size: 1.25rem; }
+.sg-summary .summary__stats .summary__score dd { font-size: 1.8rem; }
+.sg-summary .summary__card h2 { color: var(--sg-teal-dark); }
+.sg-rank {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 6px 18px; border-radius: 999px;
+  background: linear-gradient(180deg, #fff1c4, #ffd979); font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: #7a4a10;
+  box-shadow: 0 3px 0 #d39b2a;
+}
+.sg-rank__medal { font-size: 1.8rem; line-height: 1; }
+.sg-summary .summary__stats { margin: 14px 0 10px; }
+.sg-rounds { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.sg-rounds li {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border-radius: 12px;
+  background: #e8f8f5; font-size: 0.78rem; line-height: 1.15;
+}
+.sg-rounds b { font-family: var(--font-display); font-size: 1.3rem; color: var(--sg-teal-dark); line-height: 1; }
+.sg-rounds span { white-space: nowrap; font-size: 0.72rem; letter-spacing: -0.02em; }
+.sg-rounds small { font-weight: 800; color: var(--ink-soft); }
+.sign-records--summary { margin-bottom: 14px; text-align: left; }
+
+@keyframes sg-rise { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ------------------------------------------------------------- paisagem (celular deitado) */
+@media (orientation: landscape) and (max-height: 540px) {
+  .sign-vowels { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .sg-hud {
+    left: calc(10px + var(--safe-left)); top: calc(56px + var(--safe-top)); transform: none;
+    width: min(36vw, 300px); padding: 6px 10px 6px 6px; gap: 8px;
+  }
+  .sg-card { width: 58px; }
+  .sg-stats dd { font-size: 1.1rem; }
+  .sg-round { font-size: 0.82rem; }
+  .screen--sign .sg-scan { left: auto; right: calc(4% + var(--safe-right)); top: 50%; transform: translateY(-50%); width: min(40vw, 320px); gap: 8px; }
+  .screen--sign .sg-scan .ar-scan__frame { width: 42%; }
+  .sg-panel {
+    left: auto; right: calc(10px + var(--safe-right)); transform: none; width: min(56vw, 480px); padding: 8px 12px;
+    animation-name: sg-rise-side;
+  }
+  .sg-sign__card { width: 56px; }
+  .sg-answer { width: 64px; height: 64px; }
+  .sg-answer__n { font-size: 2rem; }
+  .sg-watch, .sg-flash { top: calc(58px + var(--safe-top)); left: auto; right: calc(10px + var(--safe-right)); transform: none; --tx: 0; }
+}
+@keyframes sg-rise-side { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------------- tablet / computador */
+@media (min-width: 960px) and (min-height: 600px) {
+  .sg-hud { width: min(calc(100% - 40px), 600px); }
+  .sg-card { width: 96px; }
+  .sg-panel { width: min(calc(100% - 40px), 600px); padding: 16px 20px; }
+  .sg-watch, .sg-flash { top: calc(236px + var(--safe-top)); }
+  .sign-vowel__animal { font-size: 0.9rem; }
+}

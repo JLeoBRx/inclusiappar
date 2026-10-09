@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Mão 3D para testes (sinais das vogais)</title>
+<style>
+  html, body { margin: 0; background: #222; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<!--
+  Ferramenta de TESTE (não faz parte do app): desenha uma mão 3D articulada
+  (modelo "generic-hand" do WebXR Input Profiles, licença MIT) fazendo os
+  sinais A, E, I, O, U em LIBRAS, em vários ângulos, sobre fundos variados.
+  As imagens geradas (tests/make_hands.mjs) passam pelo MediaPipe nos testes
+  ponta a ponta — o mesmo caminho de uma mão de verdade na câmera.
+-->
+<script type="module" src="handRenderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "inclusiapp-ar",
+  "version": "1.2.0",
+  "private": true,
+  "description": "SinalizaAção: Animais em Voga — WebApp de Realidade Aumentada (livro em AR e Sala de Jogos: jogo de cartas, bichinho virtual com cartas mágicas de LIBRAS e Sinalize e Conte com reconhecimento de mãos) com MindAR, Three.js e MediaPipe",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs 8080",
+    "models": "python3 tools/convert_models.py",
+    "targets": "node tools/compile-targets.mjs",
+    "thumbs": "python3 tools/card_thumbs.py",
+    "test": "node --test \"tests/unit/**/*.test.mjs\"",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "hands": "node tests/make_hands.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

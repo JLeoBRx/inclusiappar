@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compilador de alvos AR — SinalizaAção</title>
+<!--
+  Gera os arquivos de alvos do MindAR (.mind) e os manifestos (.json).
+
+  Uso manual: sirva a RAIZ do repositório (ex.: `npx serve .`), abra
+  /tools/compile-targets.html, clique em "Compilar" e copie os arquivos
+  baixados para inclusiapp/assets/targets/.
+
+  Uso automático: `npm run targets` (tools/compile-targets.mjs) abre esta
+  mesma página no Chromium e grava os arquivos direto na pasta.
+
+  As cartas são descobertas automaticamente: carta1, carta2, ... até a
+  primeira que não existir (png, jpg, jpeg ou webp).
+-->
+<style>
+  :root { color-scheme: light dark; --bg: #f6f3ea; --fg: #1f2a1f; --card: #fff; --accent: #2f7d32; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #151a15; --fg: #e7efe4; --card: #1f261f; --accent: #6ccf70; } }
+  body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; }
+  section { background: var(--card); border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 1px 4px #0002; }
+  button { font: inherit; padding: 10px 18px; border-radius: 8px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: progress; }
+  progress { width: 100%; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .thumbs img { height: 64px; border-radius: 4px; }
+  a.dl { display: inline-block; margin: 6px 12px 0 0; }
+  code { font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Compilador de alvos AR</h1>
+  <p>Gera <code>paginas.mind</code> (livro) e <code>cartas.mind</code> (jogo) a partir das imagens de
+    <code>inclusiapp/pag/</code> e <code>inclusiapp/cartas/</code>. A ordem dos alvos segue a numeração dos
+    arquivos (Pagina1 → alvo 0, carta1 → alvo 0...).</p>
+  <p>Depois de compilar, copie <strong>todos</strong> os arquivos baixados (<code>.mind</code>,
+    <code>.mind.gz</code> e <code>.json</code>) para <code>inclusiapp/assets/targets/</code>.</p>
+  <button id="run">Compilar</button>
+  <div id="sets"></div>
+</main>
+<script type="module">
+import '../inclusiapp/vendor/mind-ar/mindar-image.prod.js';
+
+const BASE = '../inclusiapp/';
+// maxSize: lado maior (px) usado na compilação. Medido com tests/e2e/recognition.mjs:
+// cartas a 400 px reconhecem melhor (98,8%) e geram arquivo menor que a 720 px (97,5%).
+const SETS = [
+  { id: 'paginas', label: 'Páginas do livro', folder: 'pag', prefix: 'Pagina', maxSize: 512 },
+  { id: 'cartas', label: 'Cartas do jogo', folder: 'cartas', prefix: 'carta', maxSize: 400 },
+];
+const EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp'];
+const params = new URLSearchParams(location.search);
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`não carregou ${url}`));
+    img.src = url;
+  });
+}
+
+async function exists(url) {
+  try {
+    const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    return res.ok;
+  } catch { return false; }
+}
+
+// Descobre arquivos numerados em sequência (prefixo1, prefixo2, ...).
+async function discover(set) {
+  const injected = window.__TARGET_FILES__?.[set.id];
+  if (injected) return injected;
+  const files = [];
+  for (let i = 1; i < 1000; i++) {
+    let found = null;
+    for (const ext of EXTENSIONS) {
+      const file = `${set.folder}/${set.prefix}${i}.${ext}`;
+      if (await exists(BASE + file)) { found = file; break; }
+    }
+    if (!found) break;
+    files.push(found);
+  }
+  return files;
+}
+
+// A câmera entrega ~640x480 e o detector do MindAR analisa recortes de 256x256:
+// detalhes acima do tamanho máximo nunca são vistos e só aumentam o .mind.
+const MAX_OVERRIDE = +(params.get('max') || 0);
+
+// Reduz para o tamanho máximo e achata transparência sobre branco (o compilador ignora o alfa).
+function prepare(img, maxSize) {
+  const scale = Math.min(1, maxSize / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+// FNV-1a 32 bits: o app confere se o .mind.gz corresponde ao .mind deste manifesto.
+function checksum(bytes) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < bytes.length; i++) {
+    h ^= bytes[i];
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
+async function gzip(bytes) {
+  if (!('CompressionStream' in window)) return null;
+  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+function toBase64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+function download(name, blob, container) {
+  const a = document.createElement('a');
+  a.className = 'dl';
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.textContent = `⬇ ${name}`;
+  container.appendChild(a);
+}
+
+async function compileSet(set, ui) {
+  const files = await discover(set);
+  if (!files.length) throw new Error(`nenhuma imagem encontrada em ${set.folder}/`);
+  ui.status.textContent = `${files.length} imagens encontradas. Compilando...`;
+  const images = await Promise.all(files.map((f) => loadImage(BASE + f)));
+  ui.thumbs.replaceChildren(...images.map((img) => { const c = img.cloneNode(); return c; }));
+  const compiler = new window.MINDAR.IMAGE.Compiler();
+  const started = performance.now();
+  const maxSize = MAX_OVERRIDE || set.maxSize;
+  await compiler.compileImageTargets(images.map((img) => prepare(img, maxSize)), (p) => { ui.progress.value = p; });
+  const bytes = compiler.exportData();
+  const seconds = ((performance.now() - started) / 1000).toFixed(1);
+  const manifest = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    mind: `${set.id}.mind`,
+    bytes: bytes.length,
+    checksum: checksum(bytes),
+    maxSize,
+    count: files.length,
+    targets: files.map((file, index) => ({
+      index, file, width: images[index].naturalWidth, height: images[index].naturalHeight,
+    })),
+  };
+  ui.status.textContent = `Pronto: ${files.length} alvos em ${seconds}s (${(bytes.length / 1024).toFixed(0)} KB).`;
+  download(`${set.id}.mind`, new Blob([bytes], { type: 'application/octet-stream' }), ui.links);
+  const gz = await gzip(bytes);
+  if (gz) download(`${set.id}.mind.gz`, new Blob([gz], { type: 'application/gzip' }), ui.links);
+  download(`${set.id}.json`, new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }), ui.links);
+  return { mind: toBase64(bytes), manifest };
+}
+
+async function run() {
+  const button = document.getElementById('run');
+  button.disabled = true;
+  const results = {};
+  const only = params.get('only');
+  for (const set of SETS) {
+    if (only && only !== set.id) continue;
+    const box = document.createElement('section');
+    box.innerHTML = `<h2>${set.label}</h2><p class="status">Procurando imagens...</p>
+      <progress max="100" value="0"></progress><div class="thumbs"></div><div class="links"></div>`;
+    document.getElementById('sets').appendChild(box);
+    const ui = { status: box.querySelector('.status'), progress: box.querySelector('progress'),
+      thumbs: box.querySelector('.thumbs'), links: box.querySelector('.links') };
+    try {
+      results[set.id] = await compileSet(set, ui);
+    } catch (err) {
+      ui.status.textContent = `Erro: ${err.message}`;
+      results[set.id] = { error: err.message };
+    }
+  }
+  button.disabled = false;
+  window.__COMPILED__ = results;
+}
+
+document.getElementById('run').addEventListener('click', run);
+if (params.get('auto') === '1') run();
+</script>
+</body>
+</html>
